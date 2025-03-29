@@ -1,24 +1,25 @@
-import {Component,  OnInit} from '@angular/core';
-import {TrainingService} from '../training.service';
-import {Exercise} from '../exercise.model';
-import {NgForm} from '@angular/forms';
-import {Observable} from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { TrainingService } from '../training.service';
+import { Exercise } from '../exercise.model';
+import { NgForm } from '@angular/forms';
+import { Observable } from 'rxjs';
 import * as fromTraining from '../training.reducer';
 import * as fromRoot from '../../app.reducer';
-import {Store} from '@ngrx/store';
+import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-new-training',
   templateUrl: './new-training.component.html',
-  styleUrls: ['./new-training.component.scss']
+  styleUrls: ['./new-training.component.scss'],
 })
-export class NewTrainingComponent implements OnInit{
+export class NewTrainingComponent implements OnInit {
+  exercises$: Observable<Exercise[]>;
+  isLoading$: Observable<boolean>;
 
-  exercises$: Observable<Exercise[] > ;
-  isLoading$: Observable<boolean> ;
-
-  constructor(private trainingService: TrainingService,private store : Store<fromTraining.State>) {
-  }
+  constructor(
+    private readonly trainingService: TrainingService,
+    private readonly store: Store<fromTraining.State>
+  ) {}
 
   ngOnInit(): void {
     this.isLoading$ = this.store.select(fromRoot.getIsLoading);
@@ -29,7 +30,4 @@ export class NewTrainingComponent implements OnInit{
   onStartTraining(f: NgForm) {
     this.trainingService.startExercise(f.form.value.exercise);
   }
-
-
-
 }

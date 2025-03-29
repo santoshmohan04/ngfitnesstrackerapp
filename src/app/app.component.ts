@@ -9,8 +9,7 @@ import {AuthService} from './auth/auth.service';
 export class AppComponent implements OnInit{
   @ViewChild('sidenav') sidenav;
 
-  constructor(private authService:AuthService) {
-  }
+  constructor(private readonly authService:AuthService) {}
 
   toggleSidenav(){
     this.sidenav.toggle();

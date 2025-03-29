@@ -12,11 +12,11 @@ import { TrainingService } from '../training/training.service';
 @Injectable()
 export class AuthService {
   constructor(
-    private router: Router,
-    private afAuth: AngularFireAuth,
-    private trainingService: TrainingService,
-    private uiService: UiService,
-    private store: Store<fromRoot.State>
+    private readonly router: Router,
+    private readonly afAuth: AngularFireAuth,
+    private readonly trainingService: TrainingService,
+    private readonly uiService: UiService,
+    private readonly store: Store<fromRoot.State>
   ) {}
 
   initAuthListener() {
