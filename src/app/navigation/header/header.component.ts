@@ -1,25 +1,57 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { AuthService } from '../../auth/auth.service';
-import { Observable } from 'rxjs';
-import * as fromRoot from '../../app.reducer';
+import {
+  Component,
+  EventEmitter,
+  inject,
+  OnDestroy,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { Store } from '@ngrx/store';
+import { MatButtonModule } from '@angular/material/button';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
+import { UiService } from 'src/app/shared/ui.service';
 
 @Component({
   selector: 'app-header',
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.scss'],
+  standalone: true,
+  imports: [
+    MatButtonModule,
+    MatToolbarModule,
+    MatIconModule,
+    CommonModule,
+    FlexLayoutModule,
+    RouterModule,
+  ],
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
+  store = inject(Store);
   @Output() sidenavToggle = new EventEmitter();
-  isAuth$: Observable<boolean>;
-
-  constructor(
-    private readonly authService: AuthService,
-    private readonly store: Store<fromRoot.State>
-  ) {}
+  userdetails: User;
+  authSubscription: Subscription | null = null;
+  auth = getAuth();
+  uiservice = inject(UiService);
 
   ngOnInit(): void {
-    this.isAuth$ = this.store.select(fromRoot.getIsAuth);
+    this.authSubscription = new Subscription();
+    const authUnsubscribe = onAuthStateChanged(
+      this.auth,
+      (user: User | null) => {
+        if (user) {
+          this.userdetails = user;
+        } else {
+          this.userdetails = null;
+        }
+      }
+    );
+    this.authSubscription.add(authUnsubscribe);
   }
 
   onToggleSideNav() {
@@ -27,6 +59,12 @@ export class HeaderComponent implements OnInit {
   }
 
   onLogout() {
-    this.authService.logout();
+    this.uiservice.logout();
+  }
+
+  ngOnDestroy(): void {
+    if (this.authSubscription) {
+      this.authSubscription.unsubscribe();
+    }
   }
 }

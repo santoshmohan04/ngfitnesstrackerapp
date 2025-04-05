@@ -7,10 +7,14 @@
   <span><a routerLink="/">FitTracker</a></span>
   <div fxFlex fxLayout='row' fxLayoutAlign="flex-end" fxLayoutGap="12px" fxHide.xs>
     <ul fxLayout fxLayoutGap="12px" class="navigation-items">
-      <li *ngIf="isAuth$ | async"><a routerLink="/training">Training</a></li>
-      <li *ngIf="!(isAuth$ | async)"><a routerLink="/signup">SignUp</a></li>
-      <li *ngIf="!(isAuth$ | async)"><a routerLink="/login">Login</a></li>
-      <li *ngIf="isAuth$ | async"><a (click)="onLogout()">Logout</a></li>
+      @if(userdetails){
+        <li><a routerLink="/training">{{userdetails.email}}</a></li>
+        <li><a routerLink="/training">Training</a></li>
+        <li><a (click)="onLogout()">Logout</a></li>
+      } @else {
+        <li><a routerLink="/signup">SignUp</a></li>
+        <li><a routerLink="/login">Login</a></li>
+      }
     </ul>
   </div>
 

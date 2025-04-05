@@ -1,51 +1,31 @@
-import {SET_AVAILABLE_TRAININGS, SET_FINISHED_TRAININGS, START_TRAINING, STOP_TRAINING, TrainingActions} from './training.actions';
+import {trainingsdata} from './training.actions';
 import {Exercise} from './exercise.model';
-import * as fromRoot from '../app.reducer';
-import {createFeatureSelector, createSelector} from '@ngrx/store';
+import {Action, createReducer, on} from '@ngrx/store';
+import * as authActions from '../auth/auth.actions';
 
 export interface TrainingState {
   availableExercises: Exercise[];
   finishedExercises: Exercise[];
-  activeTraining: Exercise
+  activeTraining: Exercise;
+  error:any;
 }
 
-export interface State extends fromRoot.State {
-  training: TrainingState
-}
-
-const initialState: TrainingState = {
+export const initialState: TrainingState = {
   availableExercises: [],
   finishedExercises: [],
-  activeTraining: null
+  activeTraining: null,
+  error:null
 };
 
-export function trainingReducer(state = initialState, action: TrainingActions): TrainingState {
-  switch (action.type) {
-    case SET_AVAILABLE_TRAININGS :
-      return {
-        ...state,
-        availableExercises : action.payload
-      };
-    case SET_FINISHED_TRAININGS :
-      return {
-        ...state,
-        finishedExercises : action.payload
-      };
-    case START_TRAINING: return {
-      ...state,
-      activeTraining : {...state.availableExercises.find(ex => ex.id == action.payload)}
-    };
-    case STOP_TRAINING : return {
-      ...state,
-      activeTraining : null
-    }
-    default :
-      return state;
-  }
-}
-export const getTrainingState = createFeatureSelector<TrainingState>('training');
+export const trainingReducer = createReducer(
+  initialState,
+  on(trainingsdata.setavailabletrainings, (state, {data}) => ({ ...state, availableExercises: data })),
+  on(trainingsdata.setfinishedtrainings, (state, {data}) => ({ ...state, finishedExercises:data })),
+  on(trainingsdata.starttraining, (state, {data}) => ({ ...state, activeTraining : {...state.availableExercises.find(ex => ex.id === data)}})),
+  on(trainingsdata.stoptraining, (state) => ({ ...state, activeTraining:null })),
+  on(authActions.authdata.clear, () => ({ ...initialState }))
+)
 
-export const getActiveTraining = createSelector (getTrainingState,(state: TrainingState) => state.activeTraining);
-export const getIsTraining = createSelector (getTrainingState,(state: TrainingState) => state.activeTraining != null);
-export const getAvailableTrainings = createSelector (getTrainingState,(state: TrainingState) => state.availableExercises);
-export const getFinishedTrainings = createSelector (getTrainingState,(state: TrainingState) => state.finishedExercises);
+export function trainingreducer(state: TrainingState | undefined, action: Action) {
+  return trainingReducer(state, action);
+}

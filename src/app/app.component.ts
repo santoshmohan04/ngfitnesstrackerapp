@@ -1,21 +1,20 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {AuthService} from './auth/auth.service';
+import {Component, ElementRef, ViewChild} from '@angular/core';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { RouterOutlet } from '@angular/router';
+import { SidenavListComponent } from './navigation/sidenav-list/sidenav-list.component';
+import { HeaderComponent } from './navigation/header/header.component';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss'],
+    standalone: true,
+    imports: [RouterOutlet, MatSidenavModule, SidenavListComponent, HeaderComponent]
 })
-export class AppComponent implements OnInit{
-  @ViewChild('sidenav') sidenav;
-
-  constructor(private readonly authService:AuthService) {}
+export class AppComponent {
+  @ViewChild('sidenav') sidenav!: ElementRef;
 
   toggleSidenav(){
-    this.sidenav.toggle();
-  }
-
-  ngOnInit() {
-    this.authService.initAuthListener();
+    this.sidenav.nativeElement.toggle();
   }
 }

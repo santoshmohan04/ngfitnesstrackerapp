@@ -1,102 +1,81 @@
 import { Injectable } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/compat/firestore';
-import { Subscription, map, take } from 'rxjs';
-import { Store } from '@ngrx/store';
-
+import {
+  Firestore,
+  collection,
+  collectionData,
+  addDoc,
+} from '@angular/fire/firestore';
 import { Exercise } from './exercise.model';
-import { UiService } from '../shared/ui.service';
-import * as UI from '../shared/ui.actions';
-import * as Training from './training.actions';
-import * as fromTraining from './training.reducer';
+import { EMPTY, Observable, catchError, from, tap } from 'rxjs';
+import { Store } from '@ngrx/store';
+import { trainingsdata } from './training.actions';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root',
+})
 export class TrainingService {
-  private fbSubs: Subscription[] = [];
-
   constructor(
-    private db: AngularFirestore,
-    private uiService: UiService,
-    private store: Store<fromTraining.State>
+    private readonly firestore: Firestore,
+    private readonly store: Store,
   ) {}
 
-  fetchAvailableExercises() {
-    this.store.dispatch(new UI.StartLoading());
-    this.fbSubs.push(
-      this.db
-        .collection('availableExercises')
-        .snapshotChanges().pipe(
-        map(docArray => {
-          // throw(new Error());
-          return docArray.map(doc => {
-            return {
-              id: doc.payload.doc.id,
-              name: doc.payload.doc.data()['name'],
-              duration: doc.payload.doc.data()['duration'],
-              calories: doc.payload.doc.data()['calories']
-            };
-          });
-        }))
-        .subscribe({
-          next: (exercises: Exercise[]) => {
-            this.store.dispatch(new UI.StopLoading());
-            this.store.dispatch(new Training.SetAvailableTrainings(exercises));
-          },
-          error: error => {
-            this.store.dispatch(new UI.StopLoading());
-            this.uiService.showSnackbar(
-              'Fetching Exercises failed, please try again later',
-              null,
-              3000
-            );
-          }
-        })
-    );
+  /** ✅ Fetch Available Exercises */
+  getAvailableExercises(): Observable<Exercise[]> {
+    const exercisesCollection = collection(this.firestore, 'availableExercises');
+    return collectionData(exercisesCollection, { idField: 'id' }) as Observable<Exercise[]>;
   }
 
-  startExercise(selectedId: string) {
-    this.store.dispatch(new Training.StartTraining(selectedId));
+  /** ✅ Add Completed Exercise */
+  addToDatabase(data: Exercise): Observable<void> {
+    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
+    return from(addDoc(finishedExercisesCollection, data)).pipe(
+      tap(() => this.store.dispatch(trainingsdata.stoptraining())),
+      catchError((error) => {
+        console.error('Error adding to database', error);
+        return EMPTY; // Or throwError(() => error); if you want to propagate the error
+      })
+    ) as Observable<void>;
   }
 
-  completeExercise() {
-    this.store.select(fromTraining.getActiveTraining).pipe(take(1)).subscribe(ex => {
-      this.addDataToDatabase({
-        ...ex,
-        date: new Date(),
-        state: 'completed'
-      });
-      this.store.dispatch(new Training.StopTraining());
-    });
+  /** ✅ Complete Exercise */
+  completeExercise(data: Exercise): Observable<void> {
+    const updatedData = {
+      ...data,
+      date: new Date(),
+      state: 'completed',
+    };
+    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
+    return from(addDoc(finishedExercisesCollection, updatedData)).pipe(
+      tap(() => this.store.dispatch(trainingsdata.stoptraining())),
+      catchError((error) => {
+        console.error('Error completing exercise', error);
+        return EMPTY; // Or throwError(() => error); if you want to propagate the error
+      })
+    ) as Observable<void>;
   }
 
-  cancelExercise(progress: number) {
-    this.store.select(fromTraining.getActiveTraining).pipe(take(1)).subscribe(ex => {
-      this.addDataToDatabase({
-        ...ex,
-        duration: ex.duration * (progress / 100),
-        calories: ex.calories * (progress / 100),
-        date: new Date(),
-        state: 'cancelled'
-      });
-      this.store.dispatch(new Training.StopTraining());
-    });
+  /** ✅ Cancel Exercise */
+  cancelExercise(data: Exercise, progress: number): Observable<void> {
+    const updatedData = {
+      ...data,
+      duration: data.duration * (progress / 100),
+      calories: data.calories * (progress / 100),
+      date: new Date(),
+      state: 'cancelled',
+    };
+    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
+    return from(addDoc(finishedExercisesCollection, updatedData)).pipe(
+      tap(() => this.store.dispatch(trainingsdata.stoptraining())),
+      catchError((error) => {
+        console.error('Error cancelling exercise', error);
+        return EMPTY; // Or throwError(() => error); if you want to propagate the error
+      })
+    ) as Observable<void>;
   }
 
-  fetchCompletedOrCancelledExercises() {
-    this.fbSubs.push(
-      this.db
-        .collection('finishedExercises')
-        .valueChanges()
-        .subscribe((exercises: Exercise[]) => {
-          this.store.dispatch(new Training.SetFinishedTrainings(exercises));
-        })
-    );
-  }
-
-  cancelSubscriptions() {
-    this.fbSubs.forEach(sub => sub.unsubscribe());
-  }
-
-  private addDataToDatabase(exercise: Exercise) {
-    this.db.collection('finishedExercises').add(exercise);
+  /** ✅ Fetch Completed or Cancelled Exercises */
+  getCompletedOrCancelledExercises(): Observable<Exercise[]> {
+    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
+    return collectionData(finishedExercisesCollection, { idField: 'id' }) as Observable<Exercise[]>;
   }
 }

@@ -1,23 +1,32 @@
-import {START_LOADING, STOP_LOADING, UIActions} from './ui.actions';
+import { Action, createReducer, on } from '@ngrx/store';
+import * as uiActions from './ui.actions';
+import * as trainingActions from '../training/training.actions';
+import { Exercise } from '../training/exercise.model';
+import * as authActions from '../auth/auth.actions';
 
 export interface State {
-  isLoading : boolean
+  isLoading : boolean;
+  exercises: Exercise[];
+  error:any;
 }
 
-const initialState : State= {
+export const initialState : State= {
   isLoading : false,
+  exercises: [],
+  error:null
 };
 
-export function uiReducer(state = initialState,action : UIActions) : State{
-  switch (action.type){
-    case START_LOADING : return {
-      isLoading : true
-    }
-    case STOP_LOADING : return {
-      isLoading : false
-    }
-    default : return state;
-  }
-}
+export const uiReducer = createReducer(
+  initialState,
+  on(uiActions.fetchexercises.fetch, (state) => ({ ...state, isLoading: true })),
+  on(trainingActions.trainingsdata.getavailabletrainings, (state) => ({ ...state, isLoading: true })),
+  on(uiActions.fetchexercises.fetchSuccess, (state, {data}) => ({ ...state, isLoading: false, exercises:data })),
+  on(uiActions.fetchexercises.fetchFailure, (state, {error}) => ({ ...state, isLoading: false, error: error})),
+  on(trainingActions.trainingsdata.setavailabletrainings, (state) => ({ ...state, isLoading: false })),
+  on(authActions.authdata.clear, () => ({ ...initialState }))
+)
 
-export const getIsLoading = (state : State) => state.isLoading;
+
+export function uireducer(state: State | undefined, action: Action) {
+  return uiReducer(state, action);
+}

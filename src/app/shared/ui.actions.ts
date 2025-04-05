@@ -1,14 +1,11 @@
-import {Action} from '@ngrx/store';
+import {createActionGroup, emptyProps, props} from '@ngrx/store';
+import { Exercise } from '../training/exercise.model';
 
-export const START_LOADING='[UI] START_LOADING';
-export const STOP_LOADING='[UI] STOP_LOADING';
-
-export class StartLoading implements Action{
-  readonly type = START_LOADING;
-}
-
-export class StopLoading implements Action{
-  readonly type = STOP_LOADING;
-}
-
-export type UIActions = StartLoading | StopLoading;
+export const fetchexercises = createActionGroup({
+  source: 'exercises',
+  events: {
+      'fetch': emptyProps(),
+      'fetchSuccess': props<{ data: Exercise[] }>(),
+      'fetchFailure': props<{ error: any }>(),
+  }
+});

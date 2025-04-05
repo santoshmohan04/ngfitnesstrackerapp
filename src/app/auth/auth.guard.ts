@@ -1,23 +1,27 @@
-import {ActivatedRouteSnapshot, CanActivate, CanLoad, Route, RouterStateSnapshot, UrlSegment, UrlTree} from '@angular/router';
-import {Observable} from 'rxjs';
-import {Injectable} from '@angular/core';
-import * as fromRoot from '../app.reducer';
-import {Store} from '@ngrx/store';
-import {take} from 'rxjs/operators';
+import { CanActivateFn, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+export const authGuard: CanActivateFn = () => {
+  const router = inject(Router);
+  const auth = getAuth();
 
-@Injectable()
-export class AuthGuard implements CanActivate, CanLoad{
+  return new Observable<boolean | ReturnType<Router['createUrlTree']>>((observer) => {
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
+      if (user) {
+        observer.next(true); // User is authenticated, allow access
+      } else {
+        observer.next(router.createUrlTree(['/login'])); // Redirect to login
+      }
+      observer.complete(); // Complete the Observable after emitting once
+    });
 
-  constructor(private store : Store<fromRoot.State>) {
-  }
+    // Cleanup function: unsubscribe from onAuthStateChanged when the Observable is unsubscribed.
+    return () => unsubscribe();
+  }).pipe(
+    map(result => result) //redundant, kept for consistency
+  );
+};
 
-  canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    return this.store.select(fromRoot.getIsAuth).pipe(take(1));
-
-    }
-
-  canLoad(route: Route, segments: UrlSegment[]): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-    return this.store.select(fromRoot.getIsAuth).pipe(take(1));
-  }
-}
