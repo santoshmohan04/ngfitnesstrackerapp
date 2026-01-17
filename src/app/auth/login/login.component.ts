@@ -13,14 +13,9 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Subscription } from 'rxjs';
-import {
-  getAuth,
-  User,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-} from 'firebase/auth';
-import { UiService } from 'src/app/shared/ui.service';
-import {MatProgressSpinnerModule} from '@angular/material/progress-spinner'
+import { Store } from '@ngrx/store';
+import { authdata } from '../auth.actions';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-login',
@@ -44,9 +39,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   hide: boolean = true;
   isLoading = false;
   router = inject(Router);
+  store = inject(Store);
   authSubscription: Subscription | null = null;
-  auth = getAuth();
-  uiservice = inject(UiService);
 
   ngOnInit(): void {
     this.loginForm = this.fb.group({
@@ -54,43 +48,19 @@ export class LoginComponent implements OnInit, OnDestroy {
       password: ['', [Validators.required]],
     });
 
-    this.initiateUserSub();
-  }
-
-  initiateUserSub() {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(
-      this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.router.navigate(['/training']);
-        } else {
-          this.uiservice.logout();
-        }
-      }
-    );
-    this.authSubscription.add(authUnsubscribe);
+    // Subscribe to auth loading state
+    this.authSubscription = this.store.select((state: any) => state.auth?.isLoading)
+      .subscribe((loading) => {
+        this.isLoading = loading;
+      });
   }
 
   onSubmit() {
     if (this.loginForm.invalid) {
       return;
     }
-    this.isLoading = true;
     const { email, password } = this.loginForm.value;
-    signInWithEmailAndPassword(this.auth, email, password)
-      .then((userCredential) => {
-        // Signed in
-        this.isLoading = false;
-        const user = userCredential.user;
-        console.log('User logged in:', user);
-        this.router.navigate(['/training']);
-      })
-      .catch((error) => {
-        this.isLoading = false;
-        this.uiservice.showSnackbar(error.message, null, 3000);
-        console.error('Login failed:', error);
-      });
+    this.store.dispatch(authdata.login({ email, password }));
   }
 
   ngOnDestroy(): void {

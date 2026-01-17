@@ -17,7 +17,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { TrainingService } from '../training.service';
 import { CommonModule } from '@angular/common';
-import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
 
 @Component({
   selector: 'app-past-trainings',
@@ -46,28 +45,19 @@ export class PastTrainingsComponent
   ];
   dataSource = new MatTableDataSource<Exercise>();
   trainingservice = inject(TrainingService);
-  authSubscription: Subscription | null = null
-  auth = getAuth();
+  exerciseSubscription: Subscription | null = null;
 
   @ViewChild(MatSort) sort: MatSort;
   @ViewChild(MatPaginator) paginator: MatPaginator;
 
   ngOnInit(): void {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(this.auth, (user: User | null) => {
-      if (user) {
-        this.getItems();
-      } else {
-        this.dataSource.data = []; // Clear observable
-      }
-    });
-    this.authSubscription.add(authUnsubscribe);
+    this.getItems();
   }
 
-  getItems(){
-    this.trainingservice.getCompletedOrCancelledExercises().subscribe({
+  getItems() {
+    this.exerciseSubscription = this.trainingservice.getCompletedOrCancelledExercises().subscribe({
       next: (exercises: Exercise[]) => {
-        this.dataSource.data = [...exercises]
+        this.dataSource.data = [...exercises];
       },
       error: (error) => {
         console.error('Error fetching finished trainings', error);
@@ -85,8 +75,8 @@ export class PastTrainingsComponent
   }
 
   ngOnDestroy(): void {
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
+    if (this.exerciseSubscription) {
+      this.exerciseSubscription.unsubscribe();
     }
   }
 }

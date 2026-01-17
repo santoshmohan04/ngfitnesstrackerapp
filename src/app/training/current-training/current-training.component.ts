@@ -2,14 +2,13 @@ import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { StopTrainingComponent } from './stop-training.component';
 import { Store } from '@ngrx/store';
-import { Subject, takeUntil,Subscription } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { selectActiveTrainingDtls } from '../training.selector';
 import { Exercise } from '../exercise.model';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatButtonModule } from '@angular/material/button';
 import { TrainingService } from '../training.service';
-import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
 
 @Component({
   selector: 'app-current-training',
@@ -26,20 +25,9 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
   destroy$: Subject<boolean> = new Subject<boolean>();
   currentexercise!:Exercise;
   trainingservice = inject(TrainingService);
-  authSubscription: Subscription | null = null;
-    auth = getAuth();
 
   ngOnInit(): void {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(
-      this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.startOrResumeTimer();
-        }
-      }
-    );
-    this.authSubscription.add(authUnsubscribe);
+    this.startOrResumeTimer();
   }
 
   startOrResumeTimer(): void {
@@ -79,9 +67,6 @@ export class CurrentTrainingComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
-    }
     this.destroy$.next(true);
     this.destroy$.unsubscribe();
   }

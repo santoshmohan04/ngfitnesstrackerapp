@@ -3,6 +3,32 @@
 
     <mat-form-field >
       <input
+        type="text"
+        matInput
+        placeholder="First Name"
+        ngModel
+        name="firstName"
+        required
+        #firstNameInput="ngModel"
+      />
+      <mat-error *ngIf="firstNameInput.hasError('required')">First name field can't be empty.</mat-error>
+    </mat-form-field >
+
+    <mat-form-field >
+      <input
+        type="text"
+        matInput
+        placeholder="Last Name"
+        ngModel
+        name="lastName"
+        required
+        #lastNameInput="ngModel"
+      />
+      <mat-error *ngIf="lastNameInput.hasError('required')">Last name field can't be empty.</mat-error>
+    </mat-form-field >
+
+    <mat-form-field >
+      <input
         type="email"
         matInput
         placeholder="Your email"

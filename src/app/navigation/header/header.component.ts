@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
+import { User } from 'src/app/auth/user.model';
 import { UiService } from 'src/app/shared/ui.service';
 
 @Component({
@@ -34,24 +34,16 @@ import { UiService } from 'src/app/shared/ui.service';
 export class HeaderComponent implements OnInit, OnDestroy {
   store = inject(Store);
   @Output() sidenavToggle = new EventEmitter();
-  userdetails: User;
+  userdetails: User | null = null;
   authSubscription: Subscription | null = null;
-  auth = getAuth();
   uiservice = inject(UiService);
 
   ngOnInit(): void {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(
-      this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.userdetails = user;
-        } else {
-          this.userdetails = null;
-        }
-      }
-    );
-    this.authSubscription.add(authUnsubscribe);
+    this.authSubscription = this.store
+      .select((state: any) => state.auth?.loggedInUser)
+      .subscribe((user: User | null) => {
+        this.userdetails = user;
+      });
   }
 
   onToggleSideNav() {

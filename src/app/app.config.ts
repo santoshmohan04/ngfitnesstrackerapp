@@ -9,7 +9,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { provideStore } from '@ngrx/store';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideEffects } from '@ngrx/effects';
 import { provideRouterStore } from '@ngrx/router-store';
 import {
@@ -18,23 +18,15 @@ import {
 } from '@ngrx/store-devtools';
 import * as fromApp from './app.reducer';
 import { AuthEffects } from './auth/auth.effects';
-import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { provideFirestore, getFirestore } from '@angular/fire/firestore';
-import { provideAuth, getAuth } from '@angular/fire/auth';
-import { provideStorage, getStorage } from '@angular/fire/storage';
-import { environment } from '../environments/environment';
+import { authInterceptor } from './auth/auth.interceptor';
 
 // Application configuration
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideHttpClient(),
+    provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideFirebaseApp(() => initializeApp(environment.firebase)),
-    provideFirestore(() => getFirestore()),
-    provideAuth(() => getAuth()),
-    provideStorage(() => getStorage()),
     provideStore(fromApp.reducers),
     provideEffects([AuthEffects]),
     isDevMode()
