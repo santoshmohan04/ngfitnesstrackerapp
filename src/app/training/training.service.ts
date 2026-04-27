@@ -6,6 +6,21 @@ import { Store } from '@ngrx/store';
 import { trainingsdata } from './training.actions';
 import { environment } from '../../environments/environment';
 
+export interface ExerciseStats {
+  totalSessions: number;
+  totalCalories: number;
+  totalDuration: number;
+  streakDays: number;
+  completionRate: number;
+}
+
+export interface ExerciseSummary {
+  period: string;
+  totalCalories: number;
+  totalDuration: number;
+  sessions: number;
+}
+
 export interface CreateFinishedExerciseRequest {
   name: string;
   duration: number;
@@ -101,13 +116,13 @@ export class TrainingService {
   }
 
   /** Get exercise stats */
-  getExerciseStats(): Observable<{ totalSessions: number; totalCalories: number; totalDuration: number; streakDays: number; completionRate: number }> {
-    return this.http.get<{ totalSessions: number; totalCalories: number; totalDuration: number; streakDays: number; completionRate: number }>(`${this.apiUrl}/exercises/finished/stats`);
+  getExerciseStats(): Observable<ExerciseStats> {
+    return this.http.get<ExerciseStats>(`${this.apiUrl}/exercises/finished/stats`);
   }
 
   /** Get exercise summary grouped by week or month */
-  getExerciseSummary(groupBy: 'week' | 'month'): Observable<{ period: string; totalCalories: number; totalDuration: number; sessions: number }[]> {
-    return this.http.get<{ period: string; totalCalories: number; totalDuration: number; sessions: number }[]>(
+  getExerciseSummary(groupBy: 'week' | 'month'): Observable<ExerciseSummary[]> {
+    return this.http.get<ExerciseSummary[]>(
       `${this.apiUrl}/exercises/finished/summary`, { params: { groupBy } }
     );
   }

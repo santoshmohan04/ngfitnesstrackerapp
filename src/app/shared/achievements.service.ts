@@ -11,6 +11,7 @@ export interface Achievement {
 
 @Injectable({ providedIn: 'root' })
 export class AchievementsService {
+  private readonly ONE_DAY_MS = 86400000;
   compute(finishedExercises: Exercise[]): Achievement[] {
     const completed = finishedExercises.filter(e => e.state === 'completed');
     const totalCalories = completed.reduce((sum, e) => sum + (e.calories || 0), 0);
@@ -62,9 +63,8 @@ export class AchievementsService {
     ))].map(d => new Date(d).getTime()).sort((a, b) => b - a);
 
     let streak = 1;
-    const ONE_DAY = 86400000;
     for (let i = 1; i < days.length; i++) {
-      if (days[i - 1] - days[i] === ONE_DAY) streak++;
+      if (days[i - 1] - days[i] === this.ONE_DAY_MS) streak++;
       else break;
     }
     return streak;
