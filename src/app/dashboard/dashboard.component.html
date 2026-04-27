@@ -1,0 +1,171 @@
+<div class="dashboard-container" fxLayout="column" fxLayoutGap="24px">
+
+  <!-- Header -->
+  <div class="dashboard-header" fxLayout="row" fxLayoutAlign="space-between center" fxLayout.lt-sm="column" fxLayoutGap.lt-sm="12px">
+    <h1 class="welcome-title">
+      Welcome back, <span class="user-name">{{ loggedInUser?.firstName || 'there' }}</span>!
+    </h1>
+    <button mat-raised-button color="primary" (click)="onStartTraining()">
+      <mat-icon>play_arrow</mat-icon>
+      Start New Exercise
+    </button>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" fxLayout="row" fxLayoutAlign="center center" class="spinner-container">
+    <mat-spinner diameter="56"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- Stats Cards Row -->
+    <div fxLayout="row wrap" fxLayoutGap="16px grid">
+      <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
+        <mat-card class="stat-card sessions-card">
+          <mat-card-content>
+            <mat-icon class="stat-icon">fitness_center</mat-icon>
+            <div class="stat-value">{{ stats?.totalSessions ?? 0 }}</div>
+            <div class="stat-label">Total Sessions</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
+        <mat-card class="stat-card calories-card">
+          <mat-card-content>
+            <mat-icon class="stat-icon">local_fire_department</mat-icon>
+            <div class="stat-value">{{ stats?.totalCalories ?? 0 }}</div>
+            <div class="stat-label">Calories Burned</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
+        <mat-card class="stat-card time-card">
+          <mat-card-content>
+            <mat-icon class="stat-icon">schedule</mat-icon>
+            <div class="stat-value">{{ totalHours }}</div>
+            <div class="stat-label">Total Hours</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
+        <mat-card class="stat-card streak-card">
+          <mat-card-content>
+            <mat-icon class="stat-icon">whatshot</mat-icon>
+            <div class="stat-value">{{ stats?.streakDays ?? 0 }}</div>
+            <div class="stat-label">Streak Days</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
+        <mat-card class="stat-card completion-card">
+          <mat-card-content>
+            <mat-icon class="stat-icon">check_circle</mat-icon>
+            <div class="stat-value">{{ stats?.completionRate ?? 0 }}%</div>
+            <div class="stat-label">Completion Rate</div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Goal Progress -->
+    <mat-card *ngIf="goalProgress && (goalProgress.targetSessions || goalProgress.targetCalories || goalProgress.targetMinutes)">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>flag</mat-icon> Weekly Goal Progress
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="goal-progress-content">
+        <div *ngIf="goalProgress.targetSessions" class="progress-row">
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="progress-header">
+            <span class="progress-label">Sessions</span>
+            <span class="progress-value">{{ goalProgress.currentSessions }} / {{ goalProgress.targetSessions }}</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="sessionsProgress" color="primary"></mat-progress-bar>
+        </div>
+
+        <div *ngIf="goalProgress.targetCalories" class="progress-row">
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="progress-header">
+            <span class="progress-label">Calories</span>
+            <span class="progress-value">{{ goalProgress.currentCalories }} / {{ goalProgress.targetCalories }}</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="caloriesProgress" color="accent"></mat-progress-bar>
+        </div>
+
+        <div *ngIf="goalProgress.targetMinutes" class="progress-row">
+          <div fxLayout="row" fxLayoutAlign="space-between center" class="progress-header">
+            <span class="progress-label">Minutes</span>
+            <span class="progress-value">{{ goalProgress.currentMinutes }} / {{ goalProgress.targetMinutes }}</span>
+          </div>
+          <mat-progress-bar mode="determinate" [value]="minutesProgress" color="warn"></mat-progress-bar>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Recent Activity -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon> Recent Activity
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="recentExercises.length === 0" class="no-data" fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="8px">
+          <mat-icon>info_outline</mat-icon>
+          <span>No recent exercises found. Start your first workout!</span>
+        </div>
+
+        <mat-list *ngIf="recentExercises.length > 0">
+          <mat-list-item *ngFor="let ex of recentExercises" class="exercise-list-item">
+            <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px" class="exercise-row">
+              <span class="exercise-date">{{ ex.date | date:'shortDate' }}</span>
+              <span class="exercise-name" fxFlex>{{ ex.name }}</span>
+              <span class="exercise-calories">{{ ex.calories | number:'1.0-0' }} kcal</span>
+              <span class="state-chip" [ngClass]="ex.state === 'completed' ? 'chip-completed' : 'chip-cancelled'">
+                {{ ex.state }}
+              </span>
+            </div>
+          </mat-list-item>
+        </mat-list>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Set Weekly Goal -->
+    <mat-expansion-panel class="goal-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>edit</mat-icon>&nbsp;Set Weekly Goal
+        </mat-panel-title>
+        <mat-panel-description>Define your weekly fitness targets</mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <div fxLayout="row wrap" fxLayoutGap="16px">
+        <mat-form-field fxFlex="calc(33% - 16px)" fxFlex.lt-sm="100%">
+          <mat-label>Target Sessions</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="goalForm.targetSessions" placeholder="e.g. 5">
+        </mat-form-field>
+
+        <mat-form-field fxFlex="calc(33% - 16px)" fxFlex.lt-sm="100%">
+          <mat-label>Target Calories</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="goalForm.targetCalories" placeholder="e.g. 2000">
+        </mat-form-field>
+
+        <mat-form-field fxFlex="calc(33% - 16px)" fxFlex.lt-sm="100%">
+          <mat-label>Target Minutes</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="goalForm.targetMinutes" placeholder="e.g. 150">
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row" fxLayoutAlign="end center" class="goal-actions">
+        <button mat-raised-button color="primary" (click)="onSaveGoal()">
+          <mat-icon>save</mat-icon>
+          Save Goal
+        </button>
+      </div>
+    </mat-expansion-panel>
+
+  </ng-container>
+</div>
