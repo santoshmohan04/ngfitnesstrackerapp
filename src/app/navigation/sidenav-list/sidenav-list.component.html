@@ -1,7 +1,19 @@
 <mat-nav-list>
+  <a mat-list-item routerLink="/dashboard" *ngIf="userdetails" (click)="onToggleSidenav()">
+    <mat-icon>dashboard</mat-icon>
+    <span class="nav-caption">Dashboard</span>
+  </a>
   <a mat-list-item routerLink="/training" *ngIf="userdetails" (click)="onToggleSidenav()">
     <mat-icon>fitness_center</mat-icon>
     <span class="nav-caption">Training</span>
+  </a>
+  <a mat-list-item routerLink="/workout-plans" *ngIf="userdetails" (click)="onToggleSidenav()">
+    <mat-icon>list_alt</mat-icon>
+    <span class="nav-caption">Plans</span>
+  </a>
+  <a mat-list-item routerLink="/profile" *ngIf="userdetails" (click)="onToggleSidenav()">
+    <span class="avatar-chip" aria-hidden="true">{{userInitials}}</span>
+    <span class="nav-caption">Profile</span>
   </a>
   <a mat-list-item routerLink="/signup" *ngIf="!userdetails" (click)="onToggleSidenav()">
     <mat-icon>account_circle</mat-icon>
@@ -12,7 +24,7 @@
     <span class="nav-caption">Login</span>
   </a>
   <mat-list-item *ngIf="userdetails" (click)="onToggleSidenav();onLogout()">
-    <button mat-icon-button >
+    <button mat-icon-button aria-label="Logout">
       <mat-icon>logout</mat-icon>
       <span class="nav-caption">Logout</span>
     </button>

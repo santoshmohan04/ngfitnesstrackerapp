@@ -1,15 +1,28 @@
-<div class="welcome" fxLayout.lt-sm="column" fxLayout.gt-sm="row" fxLayoutAlign="center center"
-     fxLayoutGap.gt-sm="10%">
-  <section>
-    <h1>ACTIVITY</h1>
-    <p>Stay active and enjoy better health and more fun!</p>
-  </section>
-  <section>
-    <h1>COMMUNITY</h1>
-    <p>Get to know other people and share you passion!</p>
-  </section>
-  <section>
-    <h1>Challenges</h1>
-    <p>Never stop! Dive into new challenges every day</p>
-  </section>
+<div class="hero-section" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="24px">
+  <div class="hero-content" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="16px">
+    <mat-icon class="hero-icon">fitness_center</mat-icon>
+    <h1 class="hero-title">FitTracker</h1>
+    <p class="hero-subtitle">Track your workouts, crush your goals, and become the best version of yourself.</p>
+    <div fxLayout="row" fxLayoutGap="16px" fxLayoutAlign="center center">
+      <a routerLink="/signup" mat-raised-button color="primary" class="cta-button">Get Started Free</a>
+      <a routerLink="/login" mat-stroked-button color="primary" class="cta-button">Sign In</a>
+    </div>
+  </div>
+  <div class="features-row" fxLayout.lt-sm="column" fxLayout.gt-sm="row" fxLayoutAlign="center center" fxLayoutGap="24px">
+    <mat-card class="feature-card" fxFlex.gt-sm="25%">
+      <mat-icon color="primary">track_changes</mat-icon>
+      <h3>Track Activity</h3>
+      <p>Log every workout and monitor your progress over time.</p>
+    </mat-card>
+    <mat-card class="feature-card" fxFlex.gt-sm="25%">
+      <mat-icon color="primary">emoji_events</mat-icon>
+      <h3>Earn Achievements</h3>
+      <p>Unlock badges as you hit new milestones and keep yourself motivated.</p>
+    </mat-card>
+    <mat-card class="feature-card" fxFlex.gt-sm="25%">
+      <mat-icon color="primary">flag</mat-icon>
+      <h3>Set Goals</h3>
+      <p>Define weekly targets for sessions, calories, and minutes.</p>
+    </mat-card>
+  </div>
 </div>

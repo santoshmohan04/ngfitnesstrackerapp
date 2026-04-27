@@ -34,5 +34,10 @@ export const routes: Routes = [
       import('./workout-plans/workout-plans.component').then(f => f.WorkoutPlansComponent),
     canActivate: [authGuard],
   },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./auth/forgot-password/forgot-password.component').then(f => f.ForgotPasswordComponent),
+  },
   { path: '**', redirectTo: '' }
 ];

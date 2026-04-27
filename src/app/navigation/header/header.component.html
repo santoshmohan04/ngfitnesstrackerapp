@@ -1,6 +1,6 @@
 <mat-toolbar color="primary">
   <div fxHide.gt-xs>
-    <button (click)="onToggleSideNav()" mat-icon-button>
+    <button (click)="onToggleSideNav()" mat-icon-button aria-label="Toggle navigation menu">
       <mat-icon>menu</mat-icon>
     </button>
   </div>
@@ -8,14 +8,20 @@
   <div fxFlex fxLayout='row' fxLayoutAlign="flex-end" fxLayoutGap="12px" fxHide.xs>
     <ul fxLayout fxLayoutGap="12px" class="navigation-items">
       @if(userdetails){
-        <li><a routerLink="/training">{{userdetails.email}}</a></li>
+        <li><a routerLink="/dashboard">Dashboard</a></li>
         <li><a routerLink="/training">Training</a></li>
+        <li><a routerLink="/workout-plans">Plans</a></li>
+        <li><a routerLink="/profile">Profile</a></li>
+        <li><span class="avatar-chip" routerLink="/profile" aria-label="User profile">{{userInitials}}</span></li>
         <li><a (click)="onLogout()">Logout</a></li>
       } @else {
         <li><a routerLink="/signup">SignUp</a></li>
         <li><a routerLink="/login">Login</a></li>
       }
     </ul>
+    <button mat-icon-button (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+      <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+    </button>
   </div>
 
 </mat-toolbar>
