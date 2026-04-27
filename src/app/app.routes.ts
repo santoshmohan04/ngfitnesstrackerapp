@@ -16,4 +16,23 @@ export const routes: Routes = [
       ),
     canActivate: [authGuard],
   },
+  {
+    path: 'dashboard',
+    loadComponent: () =>
+      import('./dashboard/dashboard.component').then(f => f.DashboardComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'profile',
+    loadComponent: () =>
+      import('./profile/profile.component').then(f => f.ProfileComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'workout-plans',
+    loadComponent: () =>
+      import('./workout-plans/workout-plans.component').then(f => f.WorkoutPlansComponent),
+    canActivate: [authGuard],
+  },
+  { path: '**', redirectTo: '' }
 ];
