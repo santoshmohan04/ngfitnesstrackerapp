@@ -62,7 +62,7 @@
             <button mat-raised-button color="primary" (click)="onStartPlan(plan)">
               <mat-icon>play_arrow</mat-icon> Start
             </button>
-            <button mat-icon-button color="warn" (click)="onDeletePlan(plan.id!)" title="Delete plan">
+            <button mat-icon-button color="warn" (click)="plan.id && onDeletePlan(plan.id)" title="Delete plan">
               <mat-icon>delete</mat-icon>
             </button>
           </mat-card-actions>

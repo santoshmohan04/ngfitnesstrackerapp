@@ -2,6 +2,7 @@
   <mat-form-field fxFlex="20%">
     <mat-label>From Date</mat-label>
     <input matInput [matDatepicker]="fromPicker" [value]="fromDate"
+      aria-label="Filter exercises from date"
       (dateChange)="fromDate = $event.value; applyDateFilter()" />
     <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
     <mat-datepicker #fromPicker></mat-datepicker>
@@ -10,6 +11,7 @@
   <mat-form-field fxFlex="20%">
     <mat-label>To Date</mat-label>
     <input matInput [matDatepicker]="toPicker" [value]="toDate"
+      aria-label="Filter exercises to date"
       (dateChange)="toDate = $event.value; applyDateFilter()" />
     <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
     <mat-datepicker #toPicker></mat-datepicker>
