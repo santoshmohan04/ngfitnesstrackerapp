@@ -1,0 +1,61 @@
+.workout-plans-container {
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  h1 {
+    margin-bottom: 16px;
+  }
+}
+
+.create-plan-card {
+  margin-bottom: 24px;
+}
+
+.full-width {
+  width: 100%;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.plans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plan-card {
+  mat-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+  }
+}
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #9e9e9e;
+
+  .empty-icon {
+    font-size: 64px;
+    height: 64px;
+    width: 64px;
+    margin-bottom: 16px;
+  }
+}
+
+.no-exercises {
+  color: #9e9e9e;
+  font-style: italic;
+}

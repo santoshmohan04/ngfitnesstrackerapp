@@ -11,6 +11,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
@@ -29,6 +30,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatProgressBarModule,
   ],
 })
 export class SignupComponent implements OnInit {
@@ -37,6 +39,39 @@ export class SignupComponent implements OnInit {
   hide: boolean = true;
   isLoading: boolean = false;
   router = inject(Router);
+  passwordStrength: number = 0;
+  passwordStrengthLabel: string = '';
+
+  get strengthColor(): 'warn' | 'accent' | 'primary' {
+    if (this.passwordStrength <= 1) return 'warn';
+    if (this.passwordStrength === 2) return 'accent';
+    return 'primary';
+  }
+
+  onPasswordInput(value: string) {
+    if (!value) {
+      this.passwordStrength = 0;
+      this.passwordStrengthLabel = '';
+      return;
+    }
+    const hasUpper = /[A-Z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    const hasSpecial = /[^A-Za-z0-9]/.test(value);
+
+    if (value.length < 6) {
+      this.passwordStrength = 1;
+      this.passwordStrengthLabel = 'Weak';
+    } else if (value.length >= 10 && hasUpper && hasNumber && hasSpecial) {
+      this.passwordStrength = 4;
+      this.passwordStrengthLabel = 'Strong';
+    } else if (value.length >= 8 && (hasNumber || hasSpecial)) {
+      this.passwordStrength = 3;
+      this.passwordStrengthLabel = 'Good';
+    } else {
+      this.passwordStrength = 2;
+      this.passwordStrengthLabel = 'Fair';
+    }
+  }
 
   ngOnInit(): void {
     this.maxDate = new Date();

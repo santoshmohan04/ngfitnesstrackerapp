@@ -1,0 +1,163 @@
+.profile-container {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.spinner-container {
+  min-height: 200px;
+}
+
+// ─── Avatar ───────────────────────────────────────────────────────────────────
+
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #3f51b5;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.4);
+}
+
+.profile-info {
+  .profile-name {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .profile-email {
+    margin: 0 0 4px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .profile-joined {
+    margin: 0;
+    color: #999;
+    font-size: 13px;
+  }
+}
+
+// ─── Card Titles ──────────────────────────────────────────────────────────────
+
+mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 20px;
+    height: 20px;
+    width: 20px;
+    vertical-align: middle;
+  }
+}
+
+// ─── Form Actions ─────────────────────────────────────────────────────────────
+
+.form-actions {
+  margin-top: 8px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+}
+
+.btn-spinner {
+  display: inline-block;
+  margin-right: 4px;
+}
+
+// ─── Achievements ─────────────────────────────────────────────────────────────
+
+.achievements-content {
+  padding-top: 16px;
+}
+
+.achievement-card {
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+  border: 2px solid #e0e0e0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  cursor: default;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  }
+
+  &.earned {
+    border-color: #3f51b5;
+    background: linear-gradient(135deg, #e8eaf6 0%, #fff 100%);
+
+    .achievement-icon {
+      color: #3f51b5;
+    }
+
+    .achievement-title {
+      color: #1a237e;
+    }
+  }
+
+  &.unearned {
+    opacity: 0.4;
+    filter: grayscale(0.6);
+  }
+}
+
+.achievement-icon-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.achievement-icon {
+  font-size: 40px;
+  height: 40px;
+  width: 40px;
+  color: #9e9e9e;
+}
+
+.achievement-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.achievement-description {
+  font-size: 12px;
+  color: #888;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.achievement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #3f51b5;
+  background: #e8eaf6;
+  padding: 2px 8px;
+  border-radius: 10px;
+
+  mat-icon {
+    font-size: 13px;
+    height: 13px;
+    width: 13px;
+  }
+}

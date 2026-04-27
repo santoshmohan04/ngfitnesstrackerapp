@@ -6,6 +6,21 @@ import { Store } from '@ngrx/store';
 import { trainingsdata } from './training.actions';
 import { environment } from '../../environments/environment';
 
+export interface ExerciseStats {
+  totalSessions: number;
+  totalCalories: number;
+  totalDuration: number;
+  streakDays: number;
+  completionRate: number;
+}
+
+export interface ExerciseSummary {
+  period: string;
+  totalCalories: number;
+  totalDuration: number;
+  sessions: number;
+}
+
 export interface CreateFinishedExerciseRequest {
   name: string;
   duration: number;
@@ -70,5 +85,45 @@ export class TrainingService {
   /** ✅ Fetch Completed or Cancelled Exercises */
   getCompletedOrCancelledExercises(): Observable<FinishedExercise[]> {
     return this.http.get<FinishedExercise[]>(`${this.apiUrl}/exercises/finished`);
+  }
+
+  /** Fetch Available Exercises with optional filters */
+  getAvailableExercisesFiltered(category?: string, difficulty?: string): Observable<Exercise[]> {
+    let params: Record<string, string> = {};
+    if (category) params['category'] = category;
+    if (difficulty) params['difficulty'] = difficulty;
+    return this.http.get<Exercise[]>(`${this.apiUrl}/exercises/available`, { params });
+  }
+
+  /** Create a custom exercise */
+  createCustomExercise(data: { name: string; duration: number; calories: number; category?: string; difficulty?: string }): Observable<Exercise> {
+    return this.http.post<Exercise>(`${this.apiUrl}/exercises/available`, data);
+  }
+
+  /** Delete a custom exercise */
+  deleteCustomExercise(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/exercises/available/${id}`);
+  }
+
+  /** Update a finished exercise */
+  updateFinishedExercise(id: string, data: Partial<FinishedExercise>): Observable<FinishedExercise> {
+    return this.http.put<FinishedExercise>(`${this.apiUrl}/exercises/finished/${id}`, data);
+  }
+
+  /** Delete a finished exercise */
+  deleteFinishedExercise(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/exercises/finished/${id}`);
+  }
+
+  /** Get exercise stats */
+  getExerciseStats(): Observable<ExerciseStats> {
+    return this.http.get<ExerciseStats>(`${this.apiUrl}/exercises/finished/stats`);
+  }
+
+  /** Get exercise summary grouped by week or month */
+  getExerciseSummary(groupBy: 'week' | 'month'): Observable<ExerciseSummary[]> {
+    return this.http.get<ExerciseSummary[]>(
+      `${this.apiUrl}/exercises/finished/summary`, { params: { groupBy } }
+    );
   }
 }
