@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
+import { User } from 'src/app/auth/user.model';
 import { UiService } from 'src/app/shared/ui.service';
 
 @Component({
@@ -25,24 +25,26 @@ import { UiService } from 'src/app/shared/ui.service';
 export class SidenavListComponent implements OnInit, OnDestroy {
   store = inject(Store);
   @Output() sidenavToggle = new EventEmitter();
-  userdetails: User;
+  userdetails: User | null = null;
   authSubscription: Subscription | null = null;
-  auth = getAuth();
   uiservice = inject(UiService);
 
+  get userInitials(): string {
+    if (this.userdetails?.firstName && this.userdetails?.lastName) {
+      return (this.userdetails.firstName[0] + this.userdetails.lastName[0]).toUpperCase();
+    }
+    if (this.userdetails?.email) {
+      return this.userdetails.email[0].toUpperCase();
+    }
+    return '';
+  }
+
   ngOnInit(): void {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(
-      this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.userdetails = user;
-        } else {
-          this.userdetails = null;
-        }
-      }
-    );
-    this.authSubscription.add(authUnsubscribe);
+    this.authSubscription = this.store
+      .select((state: any) => state.auth?.loggedInUser)
+      .subscribe((user: User | null) => {
+        this.userdetails = user;
+      });
   }
 
   onToggleSidenav() {

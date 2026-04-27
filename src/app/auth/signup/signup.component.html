@@ -3,6 +3,32 @@
 
     <mat-form-field >
       <input
+        type="text"
+        matInput
+        placeholder="First Name"
+        ngModel
+        name="firstName"
+        required
+        #firstNameInput="ngModel"
+      />
+      <mat-error *ngIf="firstNameInput.hasError('required')">First name field can't be empty.</mat-error>
+    </mat-form-field >
+
+    <mat-form-field >
+      <input
+        type="text"
+        matInput
+        placeholder="Last Name"
+        ngModel
+        name="lastName"
+        required
+        #lastNameInput="ngModel"
+      />
+      <mat-error *ngIf="lastNameInput.hasError('required')">Last name field can't be empty.</mat-error>
+    </mat-form-field >
+
+    <mat-form-field >
+      <input
         type="email"
         matInput
         placeholder="Your email"
@@ -25,6 +51,7 @@
         name="password"
         minlength="6"
         #pwInput="ngModel"
+        (ngModelChange)="onPasswordInput($event)"
       />
       <button mat-icon-button matSuffix (click)="hide = !hide" [disabled]="pwInput.value?.length == 0">
         <mat-icon >{{hide ? 'visibility':'visibility_off'}}</mat-icon>
@@ -32,6 +59,12 @@
       <mat-hint align="end">({{pwInput.value?.length}} / 6)</mat-hint>
       <mat-error *ngIf="pwInput.value?.length<6">Password length must be at least 6 characters long.</mat-error>
     </mat-form-field>
+    <mat-progress-bar *ngIf="passwordStrength > 0"
+      [mode]="'determinate'"
+      [value]="passwordStrength * 25"
+      [color]="strengthColor">
+    </mat-progress-bar>
+    <small *ngIf="passwordStrength > 0">{{ passwordStrengthLabel }}</small>
 
     <mat-form-field>
       <input

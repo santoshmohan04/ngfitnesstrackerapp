@@ -1,81 +1,129 @@
 import { Injectable } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  collectionData,
-  addDoc,
-} from '@angular/fire/firestore';
+import { HttpClient } from '@angular/common/http';
 import { Exercise } from './exercise.model';
-import { EMPTY, Observable, catchError, from, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { trainingsdata } from './training.actions';
+import { environment } from '../../environments/environment';
+
+export interface ExerciseStats {
+  totalSessions: number;
+  totalCalories: number;
+  totalDuration: number;
+  streakDays: number;
+  completionRate: number;
+}
+
+export interface ExerciseSummary {
+  period: string;
+  totalCalories: number;
+  totalDuration: number;
+  sessions: number;
+}
+
+export interface CreateFinishedExerciseRequest {
+  name: string;
+  duration: number;
+  calories: number;
+  date: string; // ISO 8601 format
+  state: 'completed' | 'cancelled';
+}
+
+export interface FinishedExercise extends Exercise {
+  userId: string;
+  date: Date;
+  state: 'completed' | 'cancelled';
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class TrainingService {
+  private readonly apiUrl = environment.apiUrl;
+
   constructor(
-    private readonly firestore: Firestore,
+    private readonly http: HttpClient,
     private readonly store: Store,
   ) {}
 
   /** ✅ Fetch Available Exercises */
   getAvailableExercises(): Observable<Exercise[]> {
-    const exercisesCollection = collection(this.firestore, 'availableExercises');
-    return collectionData(exercisesCollection, { idField: 'id' }) as Observable<Exercise[]>;
+    return this.http.get<Exercise[]>(`${this.apiUrl}/exercises/available`);
   }
 
-  /** ✅ Add Completed Exercise */
-  addToDatabase(data: Exercise): Observable<void> {
-    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
-    return from(addDoc(finishedExercisesCollection, data)).pipe(
-      tap(() => this.store.dispatch(trainingsdata.stoptraining())),
-      catchError((error) => {
-        console.error('Error adding to database', error);
-        return EMPTY; // Or throwError(() => error); if you want to propagate the error
-      })
-    ) as Observable<void>;
+  /** ✅ Add Finished Exercise */
+  addFinishedExercise(data: CreateFinishedExerciseRequest): Observable<FinishedExercise> {
+    return this.http.post<FinishedExercise>(`${this.apiUrl}/exercises/finished`, data).pipe(
+      tap(() => this.store.dispatch(trainingsdata.stoptraining()))
+    );
   }
 
   /** ✅ Complete Exercise */
-  completeExercise(data: Exercise): Observable<void> {
-    const updatedData = {
-      ...data,
-      date: new Date(),
+  completeExercise(data: Exercise): Observable<FinishedExercise> {
+    const requestData: CreateFinishedExerciseRequest = {
+      name: data.name,
+      duration: data.duration,
+      calories: data.calories,
+      date: new Date().toISOString(),
       state: 'completed',
     };
-    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
-    return from(addDoc(finishedExercisesCollection, updatedData)).pipe(
-      tap(() => this.store.dispatch(trainingsdata.stoptraining())),
-      catchError((error) => {
-        console.error('Error completing exercise', error);
-        return EMPTY; // Or throwError(() => error); if you want to propagate the error
-      })
-    ) as Observable<void>;
+    return this.addFinishedExercise(requestData);
   }
 
   /** ✅ Cancel Exercise */
-  cancelExercise(data: Exercise, progress: number): Observable<void> {
-    const updatedData = {
-      ...data,
+  cancelExercise(data: Exercise, progress: number): Observable<FinishedExercise> {
+    const requestData: CreateFinishedExerciseRequest = {
+      name: data.name,
       duration: data.duration * (progress / 100),
       calories: data.calories * (progress / 100),
-      date: new Date(),
+      date: new Date().toISOString(),
       state: 'cancelled',
     };
-    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
-    return from(addDoc(finishedExercisesCollection, updatedData)).pipe(
-      tap(() => this.store.dispatch(trainingsdata.stoptraining())),
-      catchError((error) => {
-        console.error('Error cancelling exercise', error);
-        return EMPTY; // Or throwError(() => error); if you want to propagate the error
-      })
-    ) as Observable<void>;
+    return this.addFinishedExercise(requestData);
   }
 
   /** ✅ Fetch Completed or Cancelled Exercises */
-  getCompletedOrCancelledExercises(): Observable<Exercise[]> {
-    const finishedExercisesCollection = collection(this.firestore, 'finishedExercises');
-    return collectionData(finishedExercisesCollection, { idField: 'id' }) as Observable<Exercise[]>;
+  getCompletedOrCancelledExercises(): Observable<FinishedExercise[]> {
+    return this.http.get<FinishedExercise[]>(`${this.apiUrl}/exercises/finished`);
+  }
+
+  /** Fetch Available Exercises with optional filters */
+  getAvailableExercisesFiltered(category?: string, difficulty?: string): Observable<Exercise[]> {
+    let params: Record<string, string> = {};
+    if (category) params['category'] = category;
+    if (difficulty) params['difficulty'] = difficulty;
+    return this.http.get<Exercise[]>(`${this.apiUrl}/exercises/available`, { params });
+  }
+
+  /** Create a custom exercise */
+  createCustomExercise(data: { name: string; duration: number; calories: number; category?: string; difficulty?: string }): Observable<Exercise> {
+    return this.http.post<Exercise>(`${this.apiUrl}/exercises/available`, data);
+  }
+
+  /** Delete a custom exercise */
+  deleteCustomExercise(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/exercises/available/${id}`);
+  }
+
+  /** Update a finished exercise */
+  updateFinishedExercise(id: string, data: Partial<FinishedExercise>): Observable<FinishedExercise> {
+    return this.http.put<FinishedExercise>(`${this.apiUrl}/exercises/finished/${id}`, data);
+  }
+
+  /** Delete a finished exercise */
+  deleteFinishedExercise(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/exercises/finished/${id}`);
+  }
+
+  /** Get exercise stats */
+  getExerciseStats(): Observable<ExerciseStats> {
+    return this.http.get<ExerciseStats>(`${this.apiUrl}/exercises/finished/stats`);
+  }
+
+  /** Get exercise summary grouped by week or month */
+  getExerciseSummary(groupBy: 'week' | 'month'): Observable<ExerciseSummary[]> {
+    return this.http.get<ExerciseSummary[]>(
+      `${this.apiUrl}/exercises/finished/summary`, { params: { groupBy } }
+    );
   }
 }

@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
+import { User } from 'src/app/auth/user.model';
 import { UiService } from 'src/app/shared/ui.service';
 
 @Component({
@@ -34,24 +34,37 @@ import { UiService } from 'src/app/shared/ui.service';
 export class HeaderComponent implements OnInit, OnDestroy {
   store = inject(Store);
   @Output() sidenavToggle = new EventEmitter();
-  userdetails: User;
+  userdetails: User | null = null;
   authSubscription: Subscription | null = null;
-  auth = getAuth();
   uiservice = inject(UiService);
+  isDarkMode: boolean = false;
+
+  get userInitials(): string {
+    if (this.userdetails?.firstName && this.userdetails?.lastName) {
+      return (this.userdetails.firstName[0] + this.userdetails.lastName[0]).toUpperCase();
+    }
+    if (this.userdetails?.email) {
+      return this.userdetails.email[0].toUpperCase();
+    }
+    return '';
+  }
 
   ngOnInit(): void {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(
-      this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.userdetails = user;
-        } else {
-          this.userdetails = null;
-        }
-      }
-    );
-    this.authSubscription.add(authUnsubscribe);
+    this.isDarkMode = localStorage.getItem('darkMode') === 'true';
+    if (this.isDarkMode) {
+      document.body.classList.add('dark-mode');
+    }
+    this.authSubscription = this.store
+      .select((state: any) => state.auth?.loggedInUser)
+      .subscribe((user: User | null) => {
+        this.userdetails = user;
+      });
+  }
+
+  toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('darkMode', String(this.isDarkMode));
+    document.body.classList.toggle('dark-mode', this.isDarkMode);
   }
 
   onToggleSideNav() {

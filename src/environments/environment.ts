@@ -4,15 +4,8 @@
 
 export const environment = {
   production: false,
-  firebase: {
-    apiKey: "AIzaSyBJNqeykplNsdb-uDkOuuTlK-2QFq1s-og",
-    authDomain: "ngmaterialmisapp.firebaseapp.com",
-    projectId: "ngmaterialmisapp",
-    storageBucket: "ngmaterialmisapp.appspot.com",
-    messagingSenderId: "1034433319060",
-    appId: "1:1034433319060:web:eeac606443541bfbb6e481",
-    measurementId: "G-FL3FJKC5ZE"
-  }
+  apiUrl: 'http://localhost:3000/api',
+  tokenKey: 'access_token'
 };
 
 /*

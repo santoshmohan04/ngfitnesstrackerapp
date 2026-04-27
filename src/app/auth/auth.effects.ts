@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { from, of } from 'rxjs';
+import { of } from 'rxjs';
 import { map, exhaustMap, catchError, tap, delay } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { UiService } from '../shared/ui.service';
-import { Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { AuthService } from './auth.service';
 import { authdata } from './auth.actions';
 import { Router } from '@angular/router';
 
@@ -13,17 +13,24 @@ export class AuthEffects {
   actions$ = inject(Actions);
   store = inject(Store);
   uiService = inject(UiService);
-  auth = inject(Auth);
+  authService = inject(AuthService);
   router = inject(Router);
 
   login$ = createEffect(() =>
     this.actions$.pipe(
       ofType(authdata.login),
       exhaustMap((action) =>
-        from(signInWithEmailAndPassword(this.auth, action.email, action.password)).pipe(
-          map((result) => {
-            sessionStorage.setItem('authUser', JSON.stringify(result));
-            return authdata.loginSuccess({ data: result });
+        this.authService.login({ email: action.email, password: action.password }).pipe(
+          map((response) => {
+            return authdata.loginSuccess({ 
+              token: response.access_token,
+              user: {
+                userId: response.user.id,
+                email: response.user.email,
+                firstName: response.user.firstName,
+                lastName: response.user.lastName
+              }
+            });
           }),
           catchError((error) => {
             this.uiService.showSnackbar(error.message, null, 3000);
@@ -38,18 +45,30 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(authdata.loginSuccess),
       delay(500),
-      tap(() => this.router.navigate(['/training']))
+      tap(() => this.router.navigate(['/dashboard']))
     );
-  }, { dispatch: false });  
+  }, { dispatch: false });
 
   registerUser$ = createEffect(() =>
     this.actions$.pipe(
       ofType(authdata.signup),
       exhaustMap((action) =>
-        from(createUserWithEmailAndPassword(this.auth, action.email, action.password)).pipe(
-          map((result) => {
-            sessionStorage.setItem('authUser', JSON.stringify(result));
-            return authdata.signupSuccess({ data: result });
+        this.authService.register({ 
+          email: action.email, 
+          password: action.password,
+          firstName: action.firstName,
+          lastName: action.lastName
+        }).pipe(
+          map((response) => {
+            return authdata.signupSuccess({ 
+              token: response.access_token,
+              user: {
+                userId: response.user.id,
+                email: response.user.email,
+                firstName: response.user.firstName,
+                lastName: response.user.lastName
+              }
+            });
           }),
           catchError((error) => {
             this.uiService.showSnackbar(error.message, null, 3000);
@@ -60,11 +79,20 @@ export class AuthEffects {
     )
   );
 
+  onSignupSuccess$ = createEffect(() => {
+    return this.actions$.pipe(
+      ofType(authdata.signupSuccess),
+      delay(500),
+      tap(() => this.router.navigate(['/dashboard']))
+    );
+  }, { dispatch: false });
+
   logoutUser$ = createEffect(
     () => {
       return this.actions$.pipe(
         ofType(authdata.logout),
         tap(() => {
+          this.authService.logout().subscribe();
           this.uiService.logout();
         })
       );

@@ -1,7 +1,6 @@
 import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { trainingsdata } from '../training.actions';
-import { selectAvailableTrainingsDtls } from '../training.selector';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
@@ -10,10 +9,16 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatInputModule } from '@angular/material/input';
 import { TrainingService } from '../training.service';
 import { UiService } from 'src/app/shared/ui.service';
 import { Subscription } from 'rxjs';
-import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
+import { Exercise } from '../exercise.model';
+import { SkeletonLoaderComponent } from 'src/app/shared/skeleton-loader/skeleton-loader.component';
+
+export const CATEGORIES = ['Cardio', 'Strength', 'Flexibility', 'Balance', 'HIIT', 'Other'];
 
 @Component({
   selector: 'app-new-training',
@@ -29,59 +34,78 @@ import { getAuth, User, onAuthStateChanged } from 'firebase/auth';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatButtonModule,
+    MatChipsModule,
+    MatExpansionModule,
+    MatInputModule,
+    SkeletonLoaderComponent,
   ],
 })
 export class NewTrainingComponent implements OnInit, OnDestroy {
   store = inject(Store);
-  exercises$ = this.store.select(selectAvailableTrainingsDtls);
-  isLoading:boolean = false;
+  isLoading: boolean = false;
   trainingservice = inject(TrainingService);
   uiService = inject(UiService);
-  authSubscription: Subscription | null = null;
-  auth = getAuth();
+  exerciseSubscription: Subscription | null = null;
+
+  allExercises: Exercise[] = [];
+  selectedCategory: string = 'All';
+  categories: string[] = ['All'];
+  selectedExercise: Exercise | null = null;
+
+  readonly CATEGORIES = CATEGORIES;
+  readonly difficulties = ['Beginner', 'Intermediate', 'Advanced'];
+
+  get filteredExercises(): Exercise[] {
+    if (this.selectedCategory === 'All') return this.allExercises;
+    return this.allExercises.filter((e) => e.category === this.selectedCategory);
+  }
 
   ngOnInit(): void {
-    this.isLoading = true
+    this.isLoading = true;
     this.fetchExercises();
   }
 
   fetchExercises() {
-    this.authSubscription = new Subscription();
-    const authUnsubscribe = onAuthStateChanged(
-      this.auth,
-      (user: User | null) => {
-        if (user) {
-          this.trainingservice.getAvailableExercises().subscribe({
-            next: (res) => {
-              this.isLoading = false;
-              const trainingdata = res.map((t) => ({
-                id: t.id,
-                name: t.name,
-                duration: t.duration,
-                calories: t.calories,
-              }));
-              if (trainingdata.length > 0) {
-                this.store.dispatch(
-                  trainingsdata.setavailabletrainings({
-                    data: trainingdata,
-                  })
-                );
-              }
-            },
-            error: (err) => {
-              this.isLoading = false;
-              this.uiService.showSnackbar(
-                'Fetching Exercises failed, please try again later',
-                null,
-                3000
-              );
-            },
-          });
+    this.exerciseSubscription = this.trainingservice.getAvailableExercises().subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.allExercises = res;
+        const trainingdata = res.map((t) => ({
+          id: t.id,
+          name: t.name,
+          duration: t.duration,
+          calories: t.calories,
+          category: t.category,
+          difficulty: t.difficulty,
+        }));
+        if (trainingdata.length > 0) {
+          this.store.dispatch(
+            trainingsdata.setavailabletrainings({
+              data: trainingdata,
+            })
+          );
         }
-      }
-    );
-    this.authSubscription.add(authUnsubscribe);
-    
+        this.categories = [
+          'All',
+          ...new Set(res.filter((e) => e.category).map((e) => e.category!)),
+        ];
+      },
+      error: () => {
+        this.isLoading = false;
+        this.uiService.showError(
+          'Fetching Exercises failed, please try again later'
+        );
+      },
+    });
+  }
+
+  onCategoryChange(category: string): void {
+    this.selectedCategory = category;
+    this.selectedExercise = null;
+  }
+
+  onExerciseChange(exerciseId: string): void {
+    this.selectedExercise = this.allExercises.find((e) => e.id === exerciseId) ?? null;
   }
 
   onStartTraining(f: NgForm) {
@@ -90,9 +114,32 @@ export class NewTrainingComponent implements OnInit, OnDestroy {
     );
   }
 
+  onCreateExercise(form: NgForm): void {
+    if (form.invalid) return;
+    const { name, duration, calories, category, difficulty } = form.value;
+    this.trainingservice
+      .createCustomExercise({
+        name,
+        duration: Number(duration),
+        calories: Number(calories),
+        category: category || undefined,
+        difficulty: difficulty || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.uiService.showSuccess('Custom exercise created successfully!');
+          form.resetForm();
+          this.fetchExercises();
+        },
+        error: () => {
+          this.uiService.showError('Failed to create custom exercise.');
+        },
+      });
+  }
+
   ngOnDestroy(): void {
-    if (this.authSubscription) {
-      this.authSubscription.unsubscribe();
+    if (this.exerciseSubscription) {
+      this.exerciseSubscription.unsubscribe();
     }
   }
 }

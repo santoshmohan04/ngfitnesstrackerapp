@@ -1,8 +1,46 @@
 <section class="current-training" fxLayout="column" fxLayoutGap="16px" fxLayoutAlign="center center">
-  <mat-progress-spinner mode="determinate" [value]="progress">
-  </mat-progress-spinner>
-  <h1>{{progress}}%</h1>
-  <p>Keep on going, you can do it!</p>
-  <button mat-raised-button color="accent" (click)="stop()" >Stop</button>
+
+  <!-- Celebration screen -->
+  <ng-container *ngIf="isCompleted; else trainingView">
+    <div class="celebration" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="16px">
+      <span class="celebration-icon" aria-hidden="true">✅</span>
+      <h1>🎉 Well done!</h1>
+      <p>You burned <strong>{{ caloriesBurned }}</strong> calories!</p>
+      <p>Returning to dashboard in a moment...</p>
+    </div>
+  </ng-container>
+
+  <!-- Active training view -->
+  <ng-template #trainingView>
+    <h2>{{ currentexercise?.name }}</h2>
+    <mat-progress-spinner
+      mode="determinate"
+      [value]="progress"
+      aria-label="Training progress">
+    </mat-progress-spinner>
+    <h1 aria-live="polite">{{ progress }}%</h1>
+    <p>{{ timeRemaining }}s remaining</p>
+    <p>~{{ caloriesBurned }} cal burned</p>
+    <p>Keep on going, you can do it!</p>
+    <div fxLayout="row" fxLayoutGap="12px">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="pauseResume()"
+        [disabled]="isCompleted"
+        [attr.aria-label]="isPaused ? 'Resume exercise' : 'Pause exercise'">
+        {{ isPaused ? 'Resume' : 'Pause' }}
+      </button>
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="stop()"
+        [disabled]="isCompleted"
+        aria-label="Stop exercise">
+        Stop
+      </button>
+    </div>
+  </ng-template>
+
 </section>
 
