@@ -114,10 +114,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   onSaveGoal(): void {
     this.goalsService.setGoal(this.goalForm).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.uiService.showSnackbar('Goal saved successfully!', null, 3000);
+        this.uiService.showSuccess('Goal saved successfully!');
         this.loadData();
       },
-      error: () => this.uiService.showSnackbar('Failed to save goal. Please try again.', null, 3000),
+      error: () => this.uiService.showError('Failed to save goal. Please try again.'),
     });
   }
 

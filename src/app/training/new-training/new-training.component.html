@@ -8,7 +8,7 @@
 
       <!-- Category filter buttons -->
       <mat-card-content>
-        <div fxLayout="row wrap" fxLayoutGap="8px" style="margin-bottom: 12px;">
+        <div role="region" aria-label="Exercise filter" fxLayout="row wrap" fxLayoutGap="8px" style="margin-bottom: 12px;">
           <button
             *ngFor="let cat of categories"
             type="button"
@@ -25,7 +25,7 @@
         <mat-card-content fxLayoutAlign="center">
           <mat-form-field appearance="fill">
             <mat-label>Choose exercise</mat-label>
-            <mat-select ngModel name="exercise" required (ngModelChange)="onExerciseChange($event)">
+            <mat-select ngModel name="exercise" required (ngModelChange)="onExerciseChange($event)" aria-label="Choose exercise">
               <mat-option *ngFor="let exercise of filteredExercises" [value]="exercise.id">
                 {{ exercise.name }}
               </mat-option>
@@ -46,7 +46,7 @@
         </mat-card-content>
 
         <mat-card-actions fxLayoutAlign="center">
-          <button type="submit" mat-button [disabled]="f.invalid">Start</button>
+          <button type="submit" mat-button [disabled]="f.invalid" aria-label="Start training">Start</button>
         </mat-card-actions>
       </form>
 
@@ -101,8 +101,10 @@
     </ng-container>
 
     <ng-template #spinner>
-      <div fxLayoutAlign="center">
-        <mat-spinner></mat-spinner>
+      <div style="padding: 16px">
+        <app-skeleton-loader height="20px" width="60%"></app-skeleton-loader>
+        <app-skeleton-loader height="48px" width="100%"></app-skeleton-loader>
+        <app-skeleton-loader height="36px" width="40%"></app-skeleton-loader>
       </div>
     </ng-template>
 

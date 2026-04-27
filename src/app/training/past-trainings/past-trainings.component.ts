@@ -25,6 +25,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { EditExerciseDialogComponent } from './edit-exercise-dialog.component';
 import { DeleteExerciseDialogComponent } from './delete-exercise-dialog.component';
+import { SkeletonLoaderComponent } from 'src/app/shared/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-past-trainings',
@@ -46,6 +47,7 @@ import { DeleteExerciseDialogComponent } from './delete-exercise-dialog.componen
     MatIconModule,
     MatButtonModule,
     CommonModule,
+    SkeletonLoaderComponent,
   ],
 })
 export class PastTrainingsComponent

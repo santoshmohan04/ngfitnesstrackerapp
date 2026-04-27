@@ -1,4 +1,4 @@
-<div class="dashboard-container" fxLayout="column" fxLayoutGap="24px">
+<div role="main" class="dashboard-container" fxLayout="column" fxLayoutGap="24px">
 
   <!-- Header -->
   <div class="dashboard-header" fxLayout="row" fxLayoutAlign="space-between center" fxLayout.lt-sm="column" fxLayoutGap.lt-sm="12px">
@@ -21,7 +21,7 @@
     <!-- Stats Cards Row -->
     <div fxLayout="row wrap" fxLayoutGap="16px grid">
       <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
-        <mat-card class="stat-card sessions-card">
+        <mat-card class="stat-card sessions-card" aria-label="Total Sessions stat">
           <mat-card-content>
             <mat-icon class="stat-icon">fitness_center</mat-icon>
             <div class="stat-value">{{ stats?.totalSessions ?? 0 }}</div>
@@ -31,7 +31,7 @@
       </div>
 
       <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
-        <mat-card class="stat-card calories-card">
+        <mat-card class="stat-card calories-card" aria-label="Calories Burned stat">
           <mat-card-content>
             <mat-icon class="stat-icon">local_fire_department</mat-icon>
             <div class="stat-value">{{ stats?.totalCalories ?? 0 }}</div>
@@ -41,7 +41,7 @@
       </div>
 
       <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
-        <mat-card class="stat-card time-card">
+        <mat-card class="stat-card time-card" aria-label="Total Hours stat">
           <mat-card-content>
             <mat-icon class="stat-icon">schedule</mat-icon>
             <div class="stat-value">{{ totalHours }}</div>
@@ -51,7 +51,7 @@
       </div>
 
       <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
-        <mat-card class="stat-card streak-card">
+        <mat-card class="stat-card streak-card" aria-label="Streak Days stat">
           <mat-card-content>
             <mat-icon class="stat-icon">whatshot</mat-icon>
             <div class="stat-value">{{ stats?.streakDays ?? 0 }}</div>
@@ -61,7 +61,7 @@
       </div>
 
       <div fxFlex="20%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
-        <mat-card class="stat-card completion-card">
+        <mat-card class="stat-card completion-card" aria-label="Completion Rate stat">
           <mat-card-content>
             <mat-icon class="stat-icon">check_circle</mat-icon>
             <div class="stat-value">{{ stats?.completionRate ?? 0 }}%</div>

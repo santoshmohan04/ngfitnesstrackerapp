@@ -88,13 +88,13 @@ export class WorkoutPlansComponent implements OnInit {
     };
     this.workoutPlansService.createPlan(plan).subscribe({
       next: () => {
-        this.uiService.showSnackbar('Workout plan created!', null, 3000);
+        this.uiService.showSuccess('Workout plan created!');
         this.planForm.reset({ name: '', exerciseIds: [] });
         this.loadPlans();
       },
       error: (err) => {
         console.error('Error creating plan', err);
-        this.uiService.showSnackbar('Failed to create plan', null, 3000);
+        this.uiService.showError('Failed to create plan');
       },
     });
   }
@@ -108,11 +108,11 @@ export class WorkoutPlansComponent implements OnInit {
         this.workoutPlansService.deletePlan(id).subscribe({
           next: () => {
             this.plans = this.plans.filter((p) => p.id !== id);
-            this.uiService.showSnackbar('Plan deleted', null, 3000);
+            this.uiService.showSuccess('Plan deleted');
           },
           error: (err) => {
             console.error('Error deleting plan', err);
-            this.uiService.showSnackbar('Failed to delete plan', null, 3000);
+            this.uiService.showError('Failed to delete plan');
           },
         });
       }
@@ -120,7 +120,7 @@ export class WorkoutPlansComponent implements OnInit {
   }
 
   onStartPlan(_plan: WorkoutPlan) {
-    this.uiService.showSnackbar('Start plan feature coming soon!', null, 3000);
+    this.uiService.showInfo('Start plan feature coming soon!');
   }
 
   getExerciseNames(ids: string[]): string {

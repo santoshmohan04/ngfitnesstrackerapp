@@ -16,6 +16,7 @@ import { TrainingService } from '../training.service';
 import { UiService } from 'src/app/shared/ui.service';
 import { Subscription } from 'rxjs';
 import { Exercise } from '../exercise.model';
+import { SkeletonLoaderComponent } from 'src/app/shared/skeleton-loader/skeleton-loader.component';
 
 export const CATEGORIES = ['Cardio', 'Strength', 'Flexibility', 'Balance', 'HIIT', 'Other'];
 
@@ -36,6 +37,7 @@ export const CATEGORIES = ['Cardio', 'Strength', 'Flexibility', 'Balance', 'HIIT
     MatChipsModule,
     MatExpansionModule,
     MatInputModule,
+    SkeletonLoaderComponent,
   ],
 })
 export class NewTrainingComponent implements OnInit, OnDestroy {
@@ -90,10 +92,8 @@ export class NewTrainingComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.isLoading = false;
-        this.uiService.showSnackbar(
-          'Fetching Exercises failed, please try again later',
-          null,
-          3000
+        this.uiService.showError(
+          'Fetching Exercises failed, please try again later'
         );
       },
     });
@@ -127,12 +127,12 @@ export class NewTrainingComponent implements OnInit, OnDestroy {
       })
       .subscribe({
         next: () => {
-          this.uiService.showSnackbar('Custom exercise created successfully!', null, 3000);
+          this.uiService.showSuccess('Custom exercise created successfully!');
           form.resetForm();
           this.fetchExercises();
         },
         error: () => {
-          this.uiService.showSnackbar('Failed to create custom exercise.', null, 3000);
+          this.uiService.showError('Failed to create custom exercise.');
         },
       });
   }

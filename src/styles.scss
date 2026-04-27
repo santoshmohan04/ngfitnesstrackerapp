@@ -26,6 +26,19 @@ body {
   mat-sidenav { background-color: #1e1e1e !important; }
 }
 
+.snackbar-success .mdc-snackbar__surface {
+  background-color: #388e3c !important;
+  color: white !important;
+}
+.snackbar-error .mdc-snackbar__surface {
+  background-color: #d32f2f !important;
+  color: white !important;
+}
+.snackbar-info .mdc-snackbar__surface {
+  background-color: #1976d2 !important;
+  color: white !important;
+}
+
 .avatar-chip {
   display: inline-flex;
   align-items: center;

@@ -133,11 +133,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.profileService.updateProfile(this.profileForm.value).pipe(takeUntil(this.destroy$)).subscribe({
       next: updated => {
         this.profile = updated;
-        this.uiService.showSnackbar('Profile updated successfully!', null, 3000);
+        this.uiService.showSuccess('Profile updated successfully!');
         this.isSaving = false;
       },
       error: () => {
-        this.uiService.showSnackbar('Failed to update profile. Please try again.', null, 3000);
+        this.uiService.showError('Failed to update profile. Please try again.');
         this.isSaving = false;
       },
     });
@@ -149,12 +149,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const { currentPassword, newPassword } = this.passwordForm.value;
     this.profileService.changePassword({ currentPassword, newPassword }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
-        this.uiService.showSnackbar('Password changed successfully!', null, 3000);
+        this.uiService.showSuccess('Password changed successfully!');
         this.passwordForm.reset();
         this.isChangingPassword = false;
       },
       error: () => {
-        this.uiService.showSnackbar('Failed to change password. Please try again.', null, 3000);
+        this.uiService.showError('Failed to change password. Please try again.');
         this.isChangingPassword = false;
       },
     });

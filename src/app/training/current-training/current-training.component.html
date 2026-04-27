@@ -16,9 +16,9 @@
     <mat-progress-spinner
       mode="determinate"
       [value]="progress"
-      aria-label="Exercise progress spinner">
+      aria-label="Training progress">
     </mat-progress-spinner>
-    <h1>{{ progress }}%</h1>
+    <h1 aria-live="polite">{{ progress }}%</h1>
     <p>{{ timeRemaining }}s remaining</p>
     <p>~{{ caloriesBurned }} cal burned</p>
     <p>Keep on going, you can do it!</p>
