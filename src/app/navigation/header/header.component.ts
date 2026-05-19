@@ -16,6 +16,7 @@ import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { User } from 'src/app/auth/user.model';
 import { UiService } from 'src/app/shared/ui.service';
+import { ThemeService } from '../../welcome/theme.service';
 
 @Component({
   selector: 'app-header',
@@ -37,7 +38,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userdetails: User | null = null;
   authSubscription: Subscription | null = null;
   uiservice = inject(UiService);
-  isDarkMode: boolean = false;
+  themeService = inject(ThemeService);
+
+  get isDarkMode(): boolean {
+    return this.themeService.isDarkMode;
+  }
 
   get userInitials(): string {
     if (this.userdetails?.firstName && this.userdetails?.lastName) {
@@ -50,9 +55,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.isDarkMode = localStorage.getItem('darkMode') === 'true';
-    if (this.isDarkMode) {
-      document.body.classList.add('dark-mode');
+    const storedTheme = localStorage.getItem('darkMode') === 'true';
+    if (storedTheme && !this.themeService.isDarkMode) {
+      this.themeService.toggleTheme();
     }
     this.authSubscription = this.store
       .select((state: any) => state.auth?.loggedInUser)
@@ -62,9 +67,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   toggleDarkMode() {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('darkMode', String(this.isDarkMode));
-    document.body.classList.toggle('dark-mode', this.isDarkMode);
+    this.themeService.toggleTheme();
+    localStorage.setItem('darkMode', String(this.themeService.isDarkMode));
   }
 
   onToggleSideNav() {

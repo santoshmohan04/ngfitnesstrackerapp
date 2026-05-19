@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "test": "ng test",
+    "test": "jest",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
@@ -16,9 +16,9 @@
     "@angular/common": "^19.2.4",
     "@angular/compiler": "^19.2.4",
     "@angular/core": "^19.2.4",
+    "@angular/flex-layout": "^15.0.0-beta.42",
     "@angular/forms": "^19.2.4",
     "@angular/material": "^19.2.7",
-    "@angular/flex-layout": "^15.0.0-beta.42",
     "@angular/platform-browser": "^19.2.4",
     "@angular/platform-browser-dynamic": "^19.2.4",
     "@angular/router": "^19.2.4",
@@ -28,6 +28,7 @@
     "@ngrx/store-devtools": "^19.0.1",
     "@types/jasmine": "^5.1.7",
     "@types/node": "^22.13.14",
+    "echarts": "^6.0.0",
     "hammerjs": "^2.0.8",
     "inquirer": "^12.5.0",
     "inquirer-autocomplete-prompt": "^3.0.1",
@@ -38,6 +39,7 @@
     "karma-coverage": "^2.2.1",
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
+    "ngx-echarts": "^21.0.0",
     "open": "^10.1.0",
     "rxjs": "^7.8.2",
     "ts-node": "^10.9.2",
@@ -50,7 +52,6 @@
     "@angular/cli": "^19.2.5",
     "@angular/compiler-cli": "^19.2.4",
     "fuzzy": "^0.1.3",
-    "protractor": "~7.0.0",
     "typescript": "~5.8.2"
   }
 }

@@ -1,42 +1,48 @@
-<section>
-  <form
-    fxLayout="column"
-    fxLayoutAlign="center center"
-    fxLayoutGap="13px"
-    [formGroup]="loginForm"
-    (ngSubmit)="onSubmit()"
-  >
-    <mat-form-field>
-      <input
-        type="email"
-        matInput
-        placeholder="Your email"
-        formControlName="email"
-      />
-      <mat-hint>Please enter a valid email.</mat-hint>
-      <mat-error>Invalid or missing email.</mat-error>
-    </mat-form-field>
+<section class="auth-wrapper">
+  <mat-card class="auth-card">
+    <mat-card-header fxLayoutAlign="center center">
+      <mat-card-title class="mat-mdc-headline-5" style="margin-bottom: 24px;">Welcome Back</mat-card-title>
+    </mat-card-header>
 
-    <mat-form-field>
-      <input
-        [type]="hide ? 'password' : 'text'"
-        matInput
-        placeholder="Your password"
-        formControlName="password"
-      />
-      <mat-hint>Please enter your password.</mat-hint>
-      <mat-error>Missing password.</mat-error>
-
-      <button
-        type="button"
-        mat-icon-button
-        matSuffix
-        (click)="hide = !hide"
-        [disabled]="loginForm.get('password').value?.length == 0"
+    <mat-card-content>
+      <form
+        fxLayout="column"
+        fxLayoutAlign="center stretch"
+        fxLayoutGap="16px"
+        [formGroup]="loginForm"
+        (ngSubmit)="onSubmit()"
       >
-        <mat-icon>{{ hide ? "visibility" : "visibility_off" }}</mat-icon>
-      </button>
-    </mat-form-field>
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Email</mat-label>
+          <input
+            type="email"
+            matInput
+            formControlName="email"
+          />
+          <mat-hint>Please enter a valid email.</mat-hint>
+          <mat-error>Invalid or missing email.</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>Password</mat-label>
+          <input
+            [type]="hide ? 'password' : 'text'"
+            matInput
+            formControlName="password"
+          />
+
+          <button
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="hide = !hide"
+            [disabled]="loginForm.get('password').value?.length == 0"
+          >
+            <mat-icon>{{ hide ? "visibility" : "visibility_off" }}</mat-icon>
+          </button>
+          <mat-hint>Please enter your password.</mat-hint>
+          <mat-error>Missing password.</mat-error>
+        </mat-form-field>
 
     <div fxLayoutAlign="end center">
       <a routerLink="/forgot-password" class="forgot-link">Forgot password?</a>
@@ -45,14 +51,17 @@
     <button
       *ngIf="!isLoading; else spinner"
       type="submit"
-      mat-raised-button
+      mat-flat-button
       color="primary"
+      class="submit-btn"
       [disabled]="loginForm.invalid"
     >
       Submit
     </button>
     <ng-template #spinner>
       <mat-spinner></mat-spinner>
-    </ng-template>
-  </form>
+        </ng-template>
+      </form>
+    </mat-card-content>
+  </mat-card>
 </section>

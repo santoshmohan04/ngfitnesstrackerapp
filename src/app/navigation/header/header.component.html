@@ -5,20 +5,22 @@
     </button>
   </div>
   <span><a routerLink="/">FitTracker</a></span>
-  <div fxFlex fxLayout='row' fxLayoutAlign="flex-end" fxLayoutGap="12px" fxHide.xs>
-    <ul fxLayout fxLayoutGap="12px" class="navigation-items">
-      @if(userdetails){
-        <li><a routerLink="/dashboard">Dashboard</a></li>
-        <li><a routerLink="/training">Training</a></li>
-        <li><a routerLink="/workout-plans">Plans</a></li>
-        <li><a routerLink="/profile">Profile</a></li>
-        <li><span class="avatar-chip" routerLink="/profile" aria-label="User profile">{{userInitials}}</span></li>
-        <li><a (click)="onLogout()">Logout</a></li>
-      } @else {
-        <li><a routerLink="/signup">SignUp</a></li>
-        <li><a routerLink="/login">Login</a></li>
-      }
-    </ul>
+  
+  <!-- Flexible spacer pushes all following items to the right -->
+  <span fxFlex></span>
+
+  <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="16px" fxHide.xs>
+    @if(userdetails){
+      <a mat-button routerLink="/dashboard">Dashboard</a>
+      <a mat-button routerLink="/training">Training</a>
+      <a mat-button routerLink="/workout-plans">Plans</a>
+      <a mat-button routerLink="/profile">Profile</a>
+      <span class="avatar-chip" routerLink="/profile" aria-label="User profile">{{userInitials}}</span>
+      <a mat-button (click)="onLogout()">Logout</a>
+    } @else {
+      <a mat-button routerLink="/signup">Sign Up</a>
+      <a mat-button routerLink="/login">Login</a>
+    }
     <button mat-icon-button (click)="toggleDarkMode()" [attr.aria-label]="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
       <mat-icon>{{ isDarkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
     </button>

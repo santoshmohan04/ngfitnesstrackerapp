@@ -45,7 +45,12 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(authdata.loginSuccess),
       delay(500),
-      tap(() => this.router.navigate(['/dashboard']))
+      tap(() => {
+        const currentUrl = this.router.url;
+        if (currentUrl === '/login' || currentUrl === '/') {
+          this.router.navigate(['/dashboard']);
+        }
+      })
     );
   }, { dispatch: false });
 
@@ -83,7 +88,12 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(authdata.signupSuccess),
       delay(500),
-      tap(() => this.router.navigate(['/dashboard']))
+      tap(() => {
+        const currentUrl = this.router.url;
+        if (currentUrl === '/signup' || currentUrl === '/') {
+          this.router.navigate(['/dashboard']);
+        }
+      })
     );
   }, { dispatch: false });
 

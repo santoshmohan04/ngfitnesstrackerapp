@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, of } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { TokenHelper } from '../shared/token.helper';
+import { Store } from '@ngrx/store';
+import { authdata } from './auth.actions';
 
 // Request/Response Interfaces
 export interface LoginRequest {
@@ -30,7 +32,7 @@ export interface AuthResponse {
 
 export interface CurrentUserResponse {
   user: {
-    userId: string;
+    id: string;
     email: string;
     firstName: string;
     lastName: string;
@@ -43,7 +45,42 @@ export interface CurrentUserResponse {
 export class AuthService {
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private store: Store) {}
+
+  /**
+   * Called during application bootstrap to restore user session.
+   */
+  hydrateAuthState(): Observable<any> {
+    // 1. Check if token exists and is valid
+    if (!this.isAuthenticated()) {
+      TokenHelper.removeToken();
+      return of(null);
+    }
+
+    // 2. Fetch the user profile to re-hydrate the NgRx store
+    return this.getCurrentUser().pipe(
+      tap((response) => {
+        // Handle both `{ user: {...} }` and `{ id: ... }` response structures defensively
+        const userData = response.user ? response.user : (response as any);
+
+        // Dispatch the strongly-typed action from the authdata action group
+        this.store.dispatch(authdata.loginSuccess({ 
+          token: '', // Token is securely managed by TokenHelper, passing empty string to satisfy props
+          user: {
+            userId: userData.id,
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName
+          } as any 
+        }));
+      }),
+      catchError(() => {
+        // If the token is invalid or the server rejects it, clean up
+        TokenHelper.removeToken();
+        return of(null);
+      })
+    );
+  }
 
   /**
    * Login user with email and password

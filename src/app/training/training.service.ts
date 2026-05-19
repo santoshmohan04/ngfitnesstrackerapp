@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Exercise } from './exercise.model';
 import { Observable, tap } from 'rxjs';
@@ -39,22 +39,39 @@ export interface FinishedExercise extends Exercise {
   providedIn: 'root',
 })
 export class TrainingService {
+  private readonly http = inject(HttpClient);
+  private readonly store = inject(Store);
   private readonly apiUrl = environment.apiUrl;
 
-  constructor(
-    private readonly http: HttpClient,
-    private readonly store: Store,
-  ) {}
+  // Reactive State using Angular Signals
+  private readonly _availableExercises = signal<Exercise[]>([]);
+  public readonly availableExercises = this._availableExercises.asReadonly();
+
+  private readonly _finishedExercises = signal<FinishedExercise[]>([]);
+  public readonly finishedExercises = this._finishedExercises.asReadonly();
+
+  private readonly _exerciseStats = signal<ExerciseStats | null>(null);
+  public readonly exerciseStats = this._exerciseStats.asReadonly();
 
   /** ✅ Fetch Available Exercises */
   getAvailableExercises(): Observable<Exercise[]> {
-    return this.http.get<Exercise[]>(`${this.apiUrl}/exercises/available`);
+    return this.http.get<Exercise[]>(`${this.apiUrl}/exercises/available`).pipe(
+      tap(exercises => this._availableExercises.set(exercises))
+    );
+  }
+
+  /** ✅ Load Available Exercises into Signal */
+  loadAvailableExercises(): void {
+    this.getAvailableExercises().subscribe();
   }
 
   /** ✅ Add Finished Exercise */
   addFinishedExercise(data: CreateFinishedExerciseRequest): Observable<FinishedExercise> {
     return this.http.post<FinishedExercise>(`${this.apiUrl}/exercises/finished`, data).pipe(
-      tap(() => this.store.dispatch(trainingsdata.stoptraining()))
+      tap((exercise) => {
+        this.store.dispatch(trainingsdata.stoptraining());
+        this._finishedExercises.update(exs => [exercise, ...exs]); // Optimistic UI update
+      })
     );
   }
 
@@ -84,7 +101,14 @@ export class TrainingService {
 
   /** ✅ Fetch Completed or Cancelled Exercises */
   getCompletedOrCancelledExercises(): Observable<FinishedExercise[]> {
-    return this.http.get<FinishedExercise[]>(`${this.apiUrl}/exercises/finished`);
+    return this.http.get<FinishedExercise[]>(`${this.apiUrl}/exercises/finished`).pipe(
+      tap(exercises => this._finishedExercises.set(exercises))
+    );
+  }
+
+  /** ✅ Load Completed or Cancelled Exercises into Signal */
+  loadCompletedOrCancelledExercises(): void {
+    this.getCompletedOrCancelledExercises().subscribe();
   }
 
   /** Fetch Available Exercises with optional filters */
@@ -117,7 +141,14 @@ export class TrainingService {
 
   /** Get exercise stats */
   getExerciseStats(): Observable<ExerciseStats> {
-    return this.http.get<ExerciseStats>(`${this.apiUrl}/exercises/finished/stats`);
+    return this.http.get<ExerciseStats>(`${this.apiUrl}/exercises/finished/stats`).pipe(
+      tap(stats => this._exerciseStats.set(stats))
+    );
+  }
+
+  /** Load exercise stats into Signal */
+  loadExerciseStats(): void {
+    this.getExerciseStats().subscribe();
   }
 
   /** Get exercise summary grouped by week or month */

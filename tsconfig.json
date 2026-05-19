@@ -6,6 +6,7 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "declaration": false,
     "experimentalDecorators": true,
     "moduleResolution": "node",

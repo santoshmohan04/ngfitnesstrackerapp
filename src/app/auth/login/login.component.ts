@@ -17,6 +17,7 @@ import { Store } from '@ngrx/store';
 import { authdata } from '../auth.actions';
 import { RouterModule } from '@angular/router';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-login',
@@ -33,6 +34,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatInputModule,
     MatProgressSpinnerModule,
     RouterModule,
+    MatCardModule
   ],
 })
 export class LoginComponent implements OnInit, OnDestroy {

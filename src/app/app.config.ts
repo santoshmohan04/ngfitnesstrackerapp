@@ -3,6 +3,7 @@ import {
   provideZoneChangeDetection,
   isDevMode,
   importProvidersFrom,
+  APP_INITIALIZER,
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 
@@ -20,6 +21,13 @@ import * as fromApp from './app.reducer';
 import { AuthEffects } from './auth/auth.effects';
 import { authInterceptor } from './auth/auth.interceptor';
 import { provideNativeDateAdapter } from '@angular/material/core';
+import { provideEchartsCore } from 'ngx-echarts';
+import { AuthService } from './auth/auth.service';
+
+// Factory function for our APP_INITIALIZER
+export function initializeAuthApp(authService: AuthService) {
+  return () => authService.hydrateAuthState();
+}
 
 // Application configuration
 export const appConfig: ApplicationConfig = {
@@ -38,5 +46,13 @@ export const appConfig: ApplicationConfig = {
       StoreDevtoolsModule.instrument({ maxAge: 25 }),
     ]),
     provideNativeDateAdapter(),
+    provideEchartsCore({ echarts: () => import('echarts') }),
+    // Add the APP_INITIALIZER
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuthApp,
+      deps: [AuthService],
+      multi: true
+    }
   ],
 };

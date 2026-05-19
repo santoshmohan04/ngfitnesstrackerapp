@@ -1,10 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,12 +12,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatListModule } from '@angular/material/list';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { NgxEchartsDirective } from 'ngx-echarts';
+import type { EChartsOption } from 'echarts';
+
 import { TrainingService, ExerciseStats, FinishedExercise } from '../training/training.service';
 import { GoalsService, GoalProgress, Goal } from '../goals/goals.service';
 import { UiService } from '../shared/ui.service';
 import { selectUserDtls } from '../auth/auth.selectors';
-import { User } from '../auth/user.model';
+import { TotalHoursPipe } from './total-hours.pipe';
 
 @Component({
   selector: 'app-dashboard',
@@ -36,75 +36,91 @@ import { User } from '../auth/user.model';
     MatExpansionModule,
     MatProgressSpinnerModule,
     MatListModule,
-    FlexLayoutModule,
+    NgxEchartsDirective,
+    TotalHoursPipe
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  stats: ExerciseStats | null = null;
-  recentExercises: FinishedExercise[] = [];
-  goalProgress: GoalProgress | null = null;
-  isLoading = false;
-  loggedInUser: User | null = null;
+export class DashboardComponent implements OnInit {
+  private readonly trainingService = inject(TrainingService);
+  private readonly goalsService = inject(GoalsService);
+  private readonly uiService = inject(UiService);
+  private readonly store = inject(Store);
+  private readonly router = inject(Router);
+
+  // Store Selection directly to a Signal
+  loggedInUser = this.store.selectSignal(selectUserDtls);
+
+  // State Signals
+  stats = this.trainingService.exerciseStats;
+  recentExercises = computed(() => this.trainingService.finishedExercises().slice(0, 5));
+  goalProgress = this.goalsService.currentGoal;
+  isLoading = signal(false);
+  
   goalForm: Goal = {};
 
-  private readonly destroy$ = new Subject<void>();
+  // Computed Values (Derived State)
+  sessionsProgress = computed(() => {
+    const progress = this.goalProgress();
+    return progress?.targetSessions ? Math.min(100, (progress.currentSessions / progress.targetSessions) * 100) : 0;
+  });
 
-  constructor(
-    private readonly trainingService: TrainingService,
-    private readonly goalsService: GoalsService,
-    private readonly uiService: UiService,
-    private readonly store: Store,
-    private readonly router: Router,
-  ) {}
+  caloriesProgress = computed(() => {
+    const progress = this.goalProgress();
+    return progress?.targetCalories ? Math.min(100, (progress.currentCalories / progress.targetCalories) * 100) : 0;
+  });
+
+  minutesProgress = computed(() => {
+    const progress = this.goalProgress();
+    return progress?.targetMinutes ? Math.min(100, (progress.currentMinutes / progress.targetMinutes) * 100) : 0;
+  });
+
+  // ECharts Configuration mapping from recent exercises
+  chartOptions = computed<EChartsOption>(() => {
+    // Reverse to show oldest to newest left-to-right
+    const exercises = [...this.recentExercises()].reverse(); 
+    const dates = exercises.map(ex => new Date(ex.date!).toLocaleDateString());
+    const calories = exercises.map(ex => ex.calories);
+
+    return {
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: dates, axisLabel: { color: '#fff' } },
+      yAxis: { type: 'value', axisLabel: { color: '#fff' }, splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.12)' } } },
+      series: [{
+        data: calories,
+        type: 'bar',
+        color: '#c2185b',
+        itemStyle: { borderRadius: [4, 4, 0, 0] }
+      }]
+    };
+  });
+
+  constructor() {
+    // Automatically populate the form whenever the goal data changes
+    effect(() => {
+      const goal = this.goalProgress();
+      if (goal) {
+        this.goalForm = { targetSessions: goal.targetSessions, targetCalories: goal.targetCalories, targetMinutes: goal.targetMinutes };
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.store.select(selectUserDtls).pipe(takeUntil(this.destroy$)).subscribe(user => {
-      this.loggedInUser = user;
-    });
     this.loadData();
   }
 
   loadData(): void {
-    this.isLoading = true;
-    let pending = 3;
-    const done = () => { if (--pending === 0) this.isLoading = false; };
+    // Trigger the services to load data into their signals
+    this.trainingService.loadExerciseStats();
+    this.trainingService.loadCompletedOrCancelledExercises();
 
-    this.trainingService.getExerciseStats().pipe(takeUntil(this.destroy$)).subscribe({
-      next: stats => { this.stats = stats; done(); },
-      error: () => done(),
+    // We'll keep the subscribe here just to handle dismissing the local loading spinner
+    this.isLoading.set(true);
+    this.goalsService.getCurrentGoal().subscribe({
+      next: () => this.isLoading.set(false),
+      error: () => this.isLoading.set(false),
     });
-
-    this.trainingService.getCompletedOrCancelledExercises().pipe(takeUntil(this.destroy$)).subscribe({
-      next: exercises => { this.recentExercises = exercises.slice(0, 5); done(); },
-      error: () => done(),
-    });
-
-    this.goalsService.getCurrentGoal().pipe(takeUntil(this.destroy$)).subscribe({
-      next: goal => { this.goalProgress = goal; done(); },
-      error: () => done(),
-    });
-  }
-
-  get totalHours(): number {
-    if (!this.stats) return 0;
-    return Math.round((this.stats.totalDuration / 3600) * 10) / 10;
-  }
-
-  get sessionsProgress(): number {
-    if (!this.goalProgress?.targetSessions) return 0;
-    return Math.min(100, (this.goalProgress.currentSessions / this.goalProgress.targetSessions) * 100);
-  }
-
-  get caloriesProgress(): number {
-    if (!this.goalProgress?.targetCalories) return 0;
-    return Math.min(100, (this.goalProgress.currentCalories / this.goalProgress.targetCalories) * 100);
-  }
-
-  get minutesProgress(): number {
-    if (!this.goalProgress?.targetMinutes) return 0;
-    return Math.min(100, (this.goalProgress.currentMinutes / this.goalProgress.targetMinutes) * 100);
   }
 
   onStartTraining(): void {
@@ -112,17 +128,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   onSaveGoal(): void {
-    this.goalsService.setGoal(this.goalForm).pipe(takeUntil(this.destroy$)).subscribe({
+    this.goalsService.setGoal(this.goalForm).subscribe({
       next: () => {
         this.uiService.showSuccess('Goal saved successfully!');
         this.loadData();
       },
       error: () => this.uiService.showError('Failed to save goal. Please try again.'),
     });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
   }
 }

@@ -1,54 +1,96 @@
 /* You can add global styles to this file, and also import other style files */
-@import '@angular/material/prebuilt-themes/pink-bluegrey.css';
+@use '@angular/material' as mat;
 
-$bgColor : #303030;
-$fontColor : #fff;
+// Define your M3 light theme
+$light-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$magenta-palette,
+    tertiary: mat.$blue-palette,
+  )
+));
 
-html, body { height: 100%; }
+// Define your M3 dark theme
+$dark-theme: mat.define-theme((
+  color: (
+    theme-type: dark,
+    primary: mat.$magenta-palette,
+    tertiary: mat.$blue-palette,
+  )
+));
+
+html {
+  height: 100%;
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
+  @include mat.all-component-themes($light-theme);
+}
+
+.dark-theme {
+  @include mat.all-component-colors($dark-theme);
+}
+
 body {
+  height: 100%;
   margin: 0;
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: $bgColor;
-  color: $fontColor;
 }
 .mat-simple-snackbar{
   font-size: 15px ;
 }
 
-.dark-mode {
-  background-color: #121212 !important;
-  color: #e0e0e0 !important;
-
-  mat-toolbar { background-color: #1e1e1e !important; }
-  mat-card { background-color: #1e1e1e !important; color: #e0e0e0 !important; }
-  mat-form-field { color: #e0e0e0 !important; }
-  .mat-mdc-table { background-color: #1e1e1e !important; color: #e0e0e0 !important; }
-  mat-sidenav { background-color: #1e1e1e !important; }
+/* Modern Dashboard Grid (replaces flex-layout) */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  align-items: stretch; /* Explicitly forces grid rows to match heights */
 }
 
-.snackbar-success .mdc-snackbar__surface {
-  background-color: #388e3c !important;
-  color: white !important;
-}
-.snackbar-error .mdc-snackbar__surface {
-  background-color: #d32f2f !important;
-  color: white !important;
-}
-.snackbar-info .mdc-snackbar__surface {
-  background-color: #1976d2 !important;
-  color: white !important;
+.dashboard-card {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  
+  h2 {
+    font-size: 2.5rem;
+    margin: 10px 0;
+  }
+
+  /* Make the content area expand to fill the remaining vertical space */
+  mat-card-content {
+    flex: 1 1 auto;
+  }
 }
 
-.avatar-chip {
-  display: inline-flex;
-  align-items: center;
+.chart-container {
+  height: 300px;
+}
+
+.chart-placeholder {
+  height: 300px;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background-color: #fff;
-  color: #3f51b5;
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
+  align-items: center;
+  color: var(--mat-sys-on-surface-variant, #888);
+  text-align: center;
+
+  .placeholder-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  p {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
 }
