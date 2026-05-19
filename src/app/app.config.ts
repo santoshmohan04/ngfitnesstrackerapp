@@ -19,6 +19,7 @@ import {
 import * as fromApp from './app.reducer';
 import { AuthEffects } from './auth/auth.effects';
 import { authInterceptor } from './auth/auth.interceptor';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 // Application configuration
 export const appConfig: ApplicationConfig = {
@@ -36,5 +37,6 @@ export const appConfig: ApplicationConfig = {
     importProvidersFrom([
       StoreDevtoolsModule.instrument({ maxAge: 25 }),
     ]),
+    provideNativeDateAdapter(),
   ],
 };
