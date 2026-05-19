@@ -1,0 +1,73 @@
+<div class="workout-plans-container">
+  <h1>Workout Plans</h1>
+
+  <mat-card class="create-plan-card">
+    <mat-card-header>
+      <mat-card-title>Create New Plan</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="planForm" (ngSubmit)="onCreatePlan()">
+        <mat-form-field class="full-width">
+          <mat-label>Plan Name</mat-label>
+          <input matInput formControlName="name" placeholder="Enter plan name" />
+          @if (planForm.get('name')?.hasError('required') && planForm.get('name')?.touched) {
+            <mat-error>Plan name is required</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Exercises</mat-label>
+          <mat-select formControlName="exerciseIds" multiple>
+            @for (exercise of availableExercises; track exercise.id) {
+              <mat-option [value]="exercise.id">{{ exercise.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="submit" [disabled]="planForm.invalid">
+          <mat-icon>add</mat-icon> Create Plan
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  @if (isLoading) {
+    <div class="spinner-container">
+      <mat-spinner></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading && plans.length === 0) {
+    <div class="empty-state">
+      <mat-icon class="empty-icon">fitness_center</mat-icon>
+      <p>No workout plans yet. Create one above!</p>
+    </div>
+  }
+
+  @if (!isLoading && plans.length > 0) {
+    <div class="plans-list">
+      @for (plan of plans; track plan.id) {
+        <mat-card class="plan-card">
+          <mat-card-header>
+            <mat-card-title>{{ plan.name }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (plan.exerciseIds.length > 0) {
+              <p><strong>Exercises:</strong> {{ getExerciseNames(plan.exerciseIds) }}</p>
+            } @else {
+              <p class="no-exercises">No exercises added to this plan.</p>
+            }
+          </mat-card-content>
+          <mat-card-actions>
+            <button mat-raised-button color="primary" (click)="onStartPlan(plan)">
+              <mat-icon>play_arrow</mat-icon> Start
+            </button>
+            <button mat-icon-button color="warn" (click)="plan.id && onDeletePlan(plan.id)" title="Delete plan">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

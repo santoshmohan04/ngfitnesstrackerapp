@@ -29,6 +29,16 @@ export class SidenavListComponent implements OnInit, OnDestroy {
   authSubscription: Subscription | null = null;
   uiservice = inject(UiService);
 
+  get userInitials(): string {
+    if (this.userdetails?.firstName && this.userdetails?.lastName) {
+      return (this.userdetails.firstName[0] + this.userdetails.lastName[0]).toUpperCase();
+    }
+    if (this.userdetails?.email) {
+      return this.userdetails.email[0].toUpperCase();
+    }
+    return '';
+  }
+
   ngOnInit(): void {
     this.authSubscription = this.store
       .select((state: any) => state.auth?.loggedInUser)

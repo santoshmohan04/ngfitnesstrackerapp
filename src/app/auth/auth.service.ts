@@ -95,6 +95,15 @@ export class AuthService {
   }
 
   /**
+   * Send forgot password email
+   */
+  forgotPassword(email: string): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/forgot-password`, { email }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {

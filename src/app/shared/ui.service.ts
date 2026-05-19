@@ -19,8 +19,20 @@ export class UiService {
     this.loadingStateSubject.next(isLoading);
   }
 
-  showSnackbar(message: string, action: string | null, duration: number) {
-    this.snackbar.open(message, action, { duration });
+  showSnackbar(message: string, action: string | null, duration: number, panelClass?: string[]) {
+    this.snackbar.open(message, action, { duration, panelClass });
+  }
+
+  showSuccess(message: string) {
+    this.showSnackbar(message, null, 3000, ['snackbar-success']);
+  }
+
+  showError(message: string) {
+    this.showSnackbar(message, null, 3000, ['snackbar-error']);
+  }
+
+  showInfo(message: string) {
+    this.showSnackbar(message, null, 3000, ['snackbar-info']);
   }
 
   logout() {

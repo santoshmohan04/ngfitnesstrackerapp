@@ -1,0 +1,160 @@
+<div class="profile-container" fxLayout="column" fxLayoutGap="24px">
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" fxLayout="row" fxLayoutAlign="center center" class="spinner-container">
+    <mat-spinner diameter="56"></mat-spinner>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- Avatar + Name -->
+    <mat-card>
+      <mat-card-content>
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="24px" fxLayout.lt-sm="column" fxLayoutAlign.lt-sm="center center">
+          <div class="avatar-circle">{{ initials }}</div>
+          <div class="profile-info">
+            <h2 class="profile-name">{{ profile?.firstName }} {{ profile?.lastName }}</h2>
+            <p class="profile-email">{{ profile?.email }}</p>
+            <p class="profile-joined" *ngIf="profile?.createdAt">
+              Member since {{ profile?.createdAt | date:'mediumDate' }}
+            </p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Edit Profile Form -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>person</mat-icon> Edit Profile
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()" fxLayout="column" fxLayoutGap="8px">
+          <div fxLayout="row" fxLayoutGap="16px" fxLayout.lt-sm="column">
+            <mat-form-field fxFlex="50%" fxFlex.lt-sm="100%" appearance="outline">
+              <mat-label>First Name</mat-label>
+              <input matInput formControlName="firstName" placeholder="First Name">
+              <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">
+                First name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field fxFlex="50%" fxFlex.lt-sm="100%" appearance="outline">
+              <mat-label>Last Name</mat-label>
+              <input matInput formControlName="lastName" placeholder="Last Name">
+              <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">
+                Last name is required
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div fxLayout="row" fxLayoutAlign="end center" class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="profileForm.invalid || isSaving">
+              <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
+              <mat-icon *ngIf="!isSaving">save</mat-icon>
+              {{ isSaving ? 'Saving...' : 'Save Profile' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Change Password Form -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>lock</mat-icon> Change Password
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()" fxLayout="column" fxLayoutGap="8px">
+          <mat-form-field appearance="outline">
+            <mat-label>Current Password</mat-label>
+            <input matInput formControlName="currentPassword"
+              [type]="hideCurrentPassword ? 'password' : 'text'" placeholder="Current Password">
+            <button mat-icon-button matSuffix type="button" (click)="hideCurrentPassword = !hideCurrentPassword">
+              <mat-icon>{{ hideCurrentPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+              Current password is required
+            </mat-error>
+            <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('minlength')">
+              Minimum 6 characters required
+            </mat-error>
+          </mat-form-field>
+
+          <div fxLayout="row" fxLayoutGap="16px" fxLayout.lt-sm="column">
+            <mat-form-field fxFlex="50%" fxFlex.lt-sm="100%" appearance="outline">
+              <mat-label>New Password</mat-label>
+              <input matInput formControlName="newPassword"
+                [type]="hideNewPassword ? 'password' : 'text'" placeholder="New Password">
+              <button mat-icon-button matSuffix type="button" (click)="hideNewPassword = !hideNewPassword">
+                <mat-icon>{{ hideNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                New password is required
+              </mat-error>
+              <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                Minimum 6 characters required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field fxFlex="50%" fxFlex.lt-sm="100%" appearance="outline">
+              <mat-label>Confirm Password</mat-label>
+              <input matInput formControlName="confirmPassword"
+                [type]="hideConfirmPassword ? 'password' : 'text'" placeholder="Confirm New Password">
+              <button mat-icon-button matSuffix type="button" (click)="hideConfirmPassword = !hideConfirmPassword">
+                <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                Please confirm your password
+              </mat-error>
+              <mat-error *ngIf="passwordForm.hasError('passwordMismatch') && !passwordForm.get('confirmPassword')?.hasError('required')">
+                Passwords do not match
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div fxLayout="row" fxLayoutAlign="end center" class="form-actions">
+            <button mat-raised-button color="accent" type="submit"
+              [disabled]="passwordForm.invalid || isChangingPassword">
+              <mat-spinner *ngIf="isChangingPassword" diameter="18" class="btn-spinner"></mat-spinner>
+              <mat-icon *ngIf="!isChangingPassword">lock_reset</mat-icon>
+              {{ isChangingPassword ? 'Changing...' : 'Change Password' }}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Achievements Gallery -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>emoji_events</mat-icon> Achievements
+        </mat-card-title>
+        <mat-card-subtitle>{{ earnedCount }} of {{ achievements.length }} earned</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="achievements-content">
+        <div fxLayout="row wrap" fxLayoutGap="16px grid">
+          <div *ngFor="let achievement of achievements"
+               fxFlex="25%" fxFlex.lt-lg="33%" fxFlex.lt-md="50%" fxFlex.lt-sm="100%">
+            <div class="achievement-card" [class.earned]="achievement.earned" [class.unearned]="!achievement.earned">
+              <div class="achievement-icon-wrap">
+                <mat-icon class="achievement-icon">{{ achievement.icon }}</mat-icon>
+              </div>
+              <div class="achievement-title">{{ achievement.title }}</div>
+              <div class="achievement-description">{{ achievement.description }}</div>
+              <div class="achievement-badge" *ngIf="achievement.earned">
+                <mat-icon>verified</mat-icon> Earned
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+  </ng-container>
+</div>

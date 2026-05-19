@@ -1,33 +1,113 @@
 <section class="new-training" fxLayout fxLayoutAlign="center">
-  <form (ngSubmit)="onStartTraining(f)" #f="ngForm">
-    <mat-card fxFlex.xs="95%" fxFlex="450px">
-      <mat-card-title fxLayoutAlign="center">
-        Time To Start Workout!
-      </mat-card-title>
-      <ng-container *ngIf="!isLoading;else spinner">
-      <mat-card-content fxLayoutAlign="center">
-        <mat-form-field appearance="fill">
-          <mat-label>Choose exercise</mat-label>
-          <mat-select ngModel name="exercise" required>
-            <mat-option *ngFor="let exercise of (exercises$ | async) " [value]="exercise.id">
-              {{exercise.name}}
-            </mat-option>
+  <mat-card fxFlex.xs="95%" fxFlex="500px">
+    <mat-card-title fxLayoutAlign="center">
+      Time To Start Workout!
+    </mat-card-title>
 
-          </mat-select>
-        </mat-form-field>
-      </mat-card-content>
-      <mat-card-actions fxLayoutAlign="center">
-        <button type="submit" mat-button [disabled]="f.invalid">Start</button>
-      </mat-card-actions>
-      </ng-container>
+    <ng-container *ngIf="!isLoading; else spinner">
 
-      <ng-template  #spinner>
-        <div fxLayoutAlign="center">
-          <mat-spinner ></mat-spinner>
+      <!-- Category filter buttons -->
+      <mat-card-content>
+        <div role="region" aria-label="Exercise filter" fxLayout="row wrap" fxLayoutGap="8px" style="margin-bottom: 12px;">
+          <button
+            *ngFor="let cat of categories"
+            type="button"
+            mat-stroked-button
+            [color]="selectedCategory === cat ? 'primary' : ''"
+            (click)="onCategoryChange(cat)">
+            {{ cat }}
+          </button>
         </div>
-      </ng-template>
+      </mat-card-content>
 
-    </mat-card>
-  </form>
+      <!-- Exercise selection form -->
+      <form (ngSubmit)="onStartTraining(f)" #f="ngForm">
+        <mat-card-content fxLayoutAlign="center">
+          <mat-form-field appearance="fill">
+            <mat-label>Choose exercise</mat-label>
+            <mat-select ngModel name="exercise" required (ngModelChange)="onExerciseChange($event)" aria-label="Choose exercise">
+              <mat-option *ngFor="let exercise of filteredExercises" [value]="exercise.id">
+                {{ exercise.name }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </mat-card-content>
+
+        <!-- Exercise details preview -->
+        <mat-card-content *ngIf="selectedExercise">
+          <mat-card class="exercise-preview">
+            <mat-card-content>
+              <p><strong>Duration:</strong> {{ selectedExercise.duration }} seconds</p>
+              <p><strong>Calories:</strong> {{ selectedExercise.calories }} cal</p>
+              <p *ngIf="selectedExercise.difficulty"><strong>Difficulty:</strong> {{ selectedExercise.difficulty }}</p>
+              <p *ngIf="selectedExercise.category"><strong>Category:</strong> {{ selectedExercise.category }}</p>
+            </mat-card-content>
+          </mat-card>
+        </mat-card-content>
+
+        <mat-card-actions fxLayoutAlign="center">
+          <button type="submit" mat-button [disabled]="f.invalid" aria-label="Start training">Start</button>
+        </mat-card-actions>
+      </form>
+
+      <!-- Custom exercise creation (separate form to avoid nesting) -->
+      <mat-card-content>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Create Custom Exercise</mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <form (ngSubmit)="onCreateExercise(createForm)" #createForm="ngForm">
+            <mat-form-field appearance="fill" style="width: 100%;">
+              <mat-label>Exercise Name</mat-label>
+              <input matInput ngModel name="name" required />
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" style="width: 100%;">
+              <mat-label>Duration (seconds)</mat-label>
+              <input matInput type="number" ngModel name="duration" required min="1" />
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" style="width: 100%;">
+              <mat-label>Calories</mat-label>
+              <input matInput type="number" ngModel name="calories" required min="0" />
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" style="width: 100%;">
+              <mat-label>Category (optional)</mat-label>
+              <mat-select ngModel name="category">
+                <mat-option value="">-- None --</mat-option>
+                <mat-option *ngFor="let cat of CATEGORIES" [value]="cat">{{ cat }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" style="width: 100%;">
+              <mat-label>Difficulty (optional)</mat-label>
+              <mat-select ngModel name="difficulty">
+                <mat-option value="">-- None --</mat-option>
+                <mat-option *ngFor="let d of difficulties" [value]="d">{{ d }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <div fxLayoutAlign="center" style="margin-top: 8px;">
+              <button type="submit" mat-raised-button color="primary" [disabled]="createForm.invalid">
+                Create Exercise
+              </button>
+            </div>
+          </form>
+        </mat-expansion-panel>
+      </mat-card-content>
+
+    </ng-container>
+
+    <ng-template #spinner>
+      <div style="padding: 16px">
+        <app-skeleton-loader height="20px" width="60%"></app-skeleton-loader>
+        <app-skeleton-loader height="48px" width="100%"></app-skeleton-loader>
+        <app-skeleton-loader height="36px" width="40%"></app-skeleton-loader>
+      </div>
+    </ng-template>
+
+  </mat-card>
 </section>
 

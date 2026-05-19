@@ -45,9 +45,9 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(authdata.loginSuccess),
       delay(500),
-      tap(() => this.router.navigate(['/training']))
+      tap(() => this.router.navigate(['/dashboard']))
     );
-  }, { dispatch: false });  
+  }, { dispatch: false });
 
   registerUser$ = createEffect(() =>
     this.actions$.pipe(
@@ -83,7 +83,7 @@ export class AuthEffects {
     return this.actions$.pipe(
       ofType(authdata.signupSuccess),
       delay(500),
-      tap(() => this.router.navigate(['/training']))
+      tap(() => this.router.navigate(['/dashboard']))
     );
   }, { dispatch: false });
 
